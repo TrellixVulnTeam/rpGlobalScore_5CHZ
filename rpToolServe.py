@@ -25,14 +25,14 @@ from rpTool import calculateGlobalScore
 ##
 #
 #
-def runGlobalScore_mem(inputTar, outputTar, weight_steps, weight_fba, weight_thermo, pathway_id):
+def runGlobalScore_mem(inputTar, outputTar, weight_rp_steps, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name):
     #loop through all of them and run FBA on them
     with tarfile.open(outputTar, 'w:xz') as tf:
         with tarfile.open(inputTar, 'r:xz') as in_tf:
             for member in in_tf.getmembers():
                 if not member.name=='':
                     rpsbml = rpSBML.rpSBML(member_name, libsbml.readSBMLFromString(in_tf.extractfile(member).read().decode("utf-8")))
-                    calculateGlobalScore(rpsbml, weight_steps, weight_fba, weight_thermo, pathway_id)
+                    calculateGlobalScore(rpsbml, weight_rp_steps, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name)
                     data = libsbml.writeSBMLToString(rpsbml.document).encode('utf-8')
                     fiOut = io.BytesIO(data)
                     info = tarfile.TarInfo(member.name)
@@ -43,7 +43,7 @@ def runGlobalScore_mem(inputTar, outputTar, weight_steps, weight_fba, weight_the
 ## run using HDD 3X less than the above function
 #
 #
-def runGlobalScore_hdd(inputTar, outputTar, weight_steps, weight_fba, weight_thermo, pathway_id):
+def runGlobalScore_hdd(inputTar, outputTar, weight_rp_steps, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
             tar = tarfile.open(fileobj=inputTar, mode='r:xz')
@@ -53,7 +53,7 @@ def runGlobalScore_hdd(inputTar, outputTar, weight_steps, weight_fba, weight_the
                 fileName = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '')
                 rpsbml = rpSBML.rpSBML(fileName)
                 rpsbml.readSBML(sbml_path)
-                calculateGlobalScore(rpsbml, weight_steps, weight_fba, weight_thermo, pathway_id)
+                calculateGlobalScore(rpsbml, weight_rp_steps, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name)
                 rpsbml.writeSBML(tmpOutputFolder)
             with tarfile.open(fileobj=outputTar, mode='w:xz') as ot:
                 for sbml_path in glob.glob(tmpOutputFolder+'/*'):
@@ -106,19 +106,26 @@ class RestQuery(Resource):
         '''
         runGlobalScore_mem(inputTar,
                            outputTar,
-                           int(params['weight_steps']),
-                           int(params['weight_fba']),
-                           int(params['weight_thermo']),
-                           str(params['pathway_id']))
-        '''
-        #### HDD ####
-        #weight_steps, weight_fba, weight_thermo, pathway_id
-        runGlobalScore_hdd(inputTar,
-                           outputTar,
-                           float(params['weight_steps']),
+                           float(params['weight_rp_steps']),
                            float(params['weight_fba']),
                            float(params['weight_thermo']),
-                           str(params['pathway_id']))
+                           float(params['weight_reactionRule']),
+                           float(params['max_rp_steps']),
+                           str(params['pathway_id']),
+                           str(params['rpFBAObj_name']))
+        '''
+        #### HDD ####
+        #weight_rp_steps, weight_fba, weight_thermo, pathway_id
+        weight_reactionRule, max_rp_steps
+        runGlobalScore_hdd(inputTar,
+                           outputTar,
+                           float(params['weight_rp_steps']),
+                           float(params['weight_fba']),
+                           float(params['weight_thermo']),
+                           float(params['weight_reactionRule']),
+                           float(params['max_rp_steps']),
+                           str(params['pathway_id']),
+                           str(params['rpFBAObj_name']))
         ###### IMPORTANT ######
         outputTar.seek(0)
         #######################
