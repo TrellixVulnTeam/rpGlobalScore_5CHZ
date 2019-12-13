@@ -97,7 +97,7 @@ def calculateGlobalScore(rpsbml,
     ##### length of members ####
     ############################
     #lower is better
-    if len(members)>maxSetps:
+    if len(members)>max_rp_steps:
         logging.warning('There are more steps than specified')
         norm_steps = 1.0
     else:

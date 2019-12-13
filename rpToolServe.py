@@ -84,7 +84,7 @@ def runGlobalScore_hdd(inputTar,
                                                    max_rp_steps,
                                                    pathway_id,
                                                    rpFBAObj_name)
-                fileNames_score[fileName] = score
+                fileNames_score[fileName] = globalScore
                 rpsbml.writeSBML(tmpOutputFolder)
             #sort the results
             top_fileNames = [k for k, v in sorted(fileNames_score.items(), key=lambda item: item[1])][:topX]
@@ -151,7 +151,6 @@ class RestQuery(Resource):
         '''
         #### HDD ####
         #weight_rp_steps, weight_fba, weight_thermo, pathway_id
-        weight_reactionRule, max_rp_steps
         runGlobalScore_hdd(inputTar,
                            outputTar,
                            float(params['weight_rp_steps']),

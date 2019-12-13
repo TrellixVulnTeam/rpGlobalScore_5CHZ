@@ -17,7 +17,7 @@ docker build -t brsynth/rpglobalscore -f Dockerfile .
 Run the service
 
 ```
-docker run --network host -p 8994:8994 brsynth/rpglobalscore
+docker run -p 8888:8888 brsynth/rpglobalscore
 ```
 
 ## Running the tests
