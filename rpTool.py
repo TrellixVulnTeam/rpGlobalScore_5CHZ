@@ -122,3 +122,4 @@ def calculateGlobalScore(rpsbml,
     brsynth_annot = rp_pathway.getAnnotation().getChild('RDF').getChild('BRSynth').getChild('brsynth')
     tmpAnnot = libsbml.XMLNode.convertStringToXMLNode('<brsynth:brsynth xmlns:brsynth="http://brsynth.eu"> <brsynth:global_score value="'+str(globalScore)+'" /> </brsynth:brsynth>')
     brsynth_annot.addChild(tmpAnnot.getChild('global_score'))
+    return globalScore
