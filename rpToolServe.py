@@ -26,7 +26,16 @@ from rpTool import calculateGlobalScore
 ##
 #
 #
-def runGlobalScore_mem(inputTar, outputTar, weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name):
+def runGlobalScore_mem(inputTar,
+                       outputTar,
+                       weight_rp_steps,
+                       weight_selenzyme,
+                       weight_fba,
+                       weight_thermo,
+                       weight_reactionRule,
+                       max_rp_steps,
+                       pathway_id,
+                       rpFBAObj_name):
     #loop through all of them and run FBA on them
     with tarfile.open(outputTar, 'w:xz') as tf:
         with tarfile.open(inputTar, 'r:xz') as in_tf:
@@ -45,7 +54,17 @@ def runGlobalScore_mem(inputTar, outputTar, weight_rp_steps, weight_selenzyme, w
 ## run using HDD 3X less than the above function
 #
 #
-def runGlobalScore_hdd(inputTar, outputTar, weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, topX, pathway_id, rpFBAObj_name):
+def runGlobalScore_hdd(inputTar,
+                       outputTar,
+                       weight_rp_steps,
+                       weight_selenzyme,
+                       weight_fba,
+                       weight_thermo,
+                       weight_reactionRule,
+                       max_rp_steps,
+                       topX,
+                       pathway_id,
+                       rpFBAObj_name):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
             tar = tarfile.open(fileobj=inputTar, mode='r:xz')
@@ -56,7 +75,15 @@ def runGlobalScore_hdd(inputTar, outputTar, weight_rp_steps, weight_selenzyme, w
                 fileName = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '')
                 rpsbml = rpSBML.rpSBML(fileName)
                 rpsbml.readSBML(sbml_path)
-                globalScore = calculateGlobalScore(rpsbml, weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name)
+                globalScore = calculateGlobalScore(rpsbml,
+                                                   weight_rp_steps,
+                                                   weight_selenzyme,
+                                                   weight_fba,
+                                                   weight_thermo,
+                                                   weight_reactionRule,
+                                                   max_rp_steps,
+                                                   pathway_id,
+                                                   rpFBAObj_name)
                 fileNames_score[fileName] = score
                 rpsbml.writeSBML(tmpOutputFolder)
             #sort the results

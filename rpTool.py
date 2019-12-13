@@ -42,7 +42,7 @@ def calculateGlobalScore(rpsbml,
     ##############################
     #lower is better
     norm_rule_score = all_rule_score/len(members)
-    norm_rule_score = norm_rule_score-1.0
+    norm_rule_score = 1.0-norm_rule_score
     #print('rule_score: '+str(norm_rule_score))
     ##############################
     ####### selenzyme ############
@@ -56,9 +56,6 @@ def calculateGlobalScore(rpsbml,
     #higher is better
     norm_fba = 0.0
     try:
-        ###### theoretical flux limits
-        #norm_fba = (brsynth_dict['fba_rpFBA_obj']['value'])/(999999.0)
-        ###### practical flux limits
         #TODO: need to determine the best value of the maximal flux possible
         # look at the growth flux --> NO it dosn't work that way
         fbc = rpsbml.model.getPlugin('fbc')
@@ -94,7 +91,7 @@ def calculateGlobalScore(rpsbml,
             norm_thermo = 1.0
     except (KeyError, TypeError) as e:
         norm_thermo = 1.0
-    norm_thermo = norm_thermo-1.0
+    norm_thermo = 1.0-norm_thermo
     #print('Thermo: '+str(norm_thermo))
     ############################
     ##### length of members ####
@@ -105,7 +102,7 @@ def calculateGlobalScore(rpsbml,
         norm_steps = 1.0
     else:
         norm_steps = (float(len(members))-1.0)/(float(max_rp_steps)-1.0)
-    norm_steps = norm_steps-1.0
+    norm_steps = 1.0-norm_steps
     #print('Steps: '+str(norm_steps))
     ############################
     ##### global score #########
