@@ -13,6 +13,7 @@ import rpSBML
 #
 def calculateGlobalScore(rpsbml,
                          weight_rp_steps,
+                         weight_selenzyme,
                          weight_fba,
                          weight_thermo,
                          weight_reactionRule,
@@ -111,7 +112,7 @@ def calculateGlobalScore(rpsbml,
     ############################
     #take the mean of the different normalised scores
     #globalScore = (norm_rule_score+norm_fba+norm_thermo+norm_selenzyme)/4.0
-    globalScore = (norm_rule_score*weight_reactionRule+norm_steps*weight_rp_steps+norm_fba*weight_fba+norm_thermo*weight_thermo)/4.0
+    globalScore = (norm_selenzyme*weight_selenzyme+norm_rule_score*weight_reactionRule+norm_steps*weight_rp_steps+norm_fba*weight_fba+norm_thermo*weight_thermo)/5.0
     #print('####### Global Score: '+str(globalScore)+' #########')
     #annot = groups.getAnnotation()
     bag_brsynth = annot.getChild('RDF').getChild('BRSynth').getChild('brsynth')

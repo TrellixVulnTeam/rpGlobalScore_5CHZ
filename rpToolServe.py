@@ -26,14 +26,14 @@ from rpTool import calculateGlobalScore
 ##
 #
 #
-def runGlobalScore_mem(inputTar, outputTar, weight_rp_steps, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name):
+def runGlobalScore_mem(inputTar, outputTar, weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name):
     #loop through all of them and run FBA on them
     with tarfile.open(outputTar, 'w:xz') as tf:
         with tarfile.open(inputTar, 'r:xz') as in_tf:
             for member in in_tf.getmembers():
                 if not member.name=='':
                     rpsbml = rpSBML.rpSBML(member_name, libsbml.readSBMLFromString(in_tf.extractfile(member).read().decode("utf-8")))
-                    globalScore = calculateGlobalScore(rpsbml, weight_rp_steps, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name)
+                    globalScore = calculateGlobalScore(rpsbml, weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name)
                     data = libsbml.writeSBMLToString(rpsbml.document).encode('utf-8')
                     fiOut = io.BytesIO(data)
                     info = tarfile.TarInfo(member.name)
@@ -45,7 +45,7 @@ def runGlobalScore_mem(inputTar, outputTar, weight_rp_steps, weight_fba, weight_
 ## run using HDD 3X less than the above function
 #
 #
-def runGlobalScore_hdd(inputTar, outputTar, weight_rp_steps, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, topX, pathway_id, rpFBAObj_name):
+def runGlobalScore_hdd(inputTar, outputTar, weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, topX, pathway_id, rpFBAObj_name):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
             tar = tarfile.open(fileobj=inputTar, mode='r:xz')
@@ -56,7 +56,7 @@ def runGlobalScore_hdd(inputTar, outputTar, weight_rp_steps, weight_fba, weight_
                 fileName = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '')
                 rpsbml = rpSBML.rpSBML(fileName)
                 rpsbml.readSBML(sbml_path)
-                globalScore = calculateGlobalScore(rpsbml, weight_rp_steps, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name)
+                globalScore = calculateGlobalScore(rpsbml, weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name)
                 fileNames_score[fileName] = score
                 rpsbml.writeSBML(tmpOutputFolder)
             #sort the results
@@ -114,6 +114,7 @@ class RestQuery(Resource):
         runGlobalScore_mem(inputTar,
                            outputTar,
                            float(params['weight_rp_steps']),
+                           float(params['weight_selenzyme']),
                            float(params['weight_fba']),
                            float(params['weight_thermo']),
                            float(params['weight_reactionRule']),
@@ -127,6 +128,7 @@ class RestQuery(Resource):
         runGlobalScore_hdd(inputTar,
                            outputTar,
                            float(params['weight_rp_steps']),
+                           float(params['weight_selenzyme']),
                            float(params['weight_fba']),
                            float(params['weight_thermo']),
                            float(params['weight_reactionRule']),
