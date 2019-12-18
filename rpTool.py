@@ -16,7 +16,7 @@ def calculateGlobalScore(rpsbml,
                          weight_selenzyme,
                          weight_fba,
                          weight_thermo,
-                         weight_reactionRule,
+                         #weight_reactionRule,
                          max_rp_steps,
                          pathway_id='rp_pathway',
                          rpFBAObj_name='rpFBA_obj'):
@@ -28,9 +28,9 @@ def calculateGlobalScore(rpsbml,
     for member in members:
         reaction = rpsbml.model.getReaction(member.getIdRef())
         annot = reaction.getAnnotation()
-        ####### rule_score ###########
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(annot)
-        all_rule_score += brsynth_dict['rule_score']
+        ####### rule_score ###########
+        #all_rule_score += brsynth_dict['rule_score']
         #print('\trule_score: '+str(brsynth_dict['rule_score']))
         ####### selenzyme ############
         try:
@@ -43,9 +43,9 @@ def calculateGlobalScore(rpsbml,
     ####### rule_score ###########
     ##############################
     #lower is better
-    norm_rule_score = all_rule_score/len(members)
+    #norm_rule_score = all_rule_score/len(members)
     #print('rule_score: '+str(norm_rule_score))
-    norm_rule_score = 1.0-norm_rule_score
+    #norm_rule_score = 1.0-norm_rule_score
     #print('rule_score: '+str(norm_rule_score))
     ##############################
     ####### selenzyme ############
@@ -118,7 +118,7 @@ def calculateGlobalScore(rpsbml,
     ############################
     #take the mean of the different normalised scores
     #globalScore = (norm_rule_score+norm_fba+norm_thermo+norm_selenzyme)/4.0
-    globalScore = (norm_selenzyme*weight_selenzyme+norm_rule_score*weight_reactionRule+norm_steps*weight_rp_steps+norm_fba*weight_fba+norm_thermo*weight_thermo)/5.0
+    globalScore = (norm_selenzyme*weight_selenzyme+norm_steps*weight_rp_steps+norm_fba*weight_fba+norm_thermo*weight_thermo)/5.0
     #print('####### Global Score: '+str(globalScore)+' #########')
     #annot = groups.getAnnotation()
     bag_brsynth = annot.getChild('RDF').getChild('BRSynth').getChild('brsynth')

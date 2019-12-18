@@ -17,7 +17,7 @@ from flask_restful import Resource, Api
 import tempfile
 
 
-#sys.path.insert(0, '/home/')
+sys.path.insert(0, '/home/')
 import rpSBML
 from rpTool import calculateGlobalScore
 
@@ -32,7 +32,7 @@ def runGlobalScore_mem(inputTar,
                        weight_selenzyme,
                        weight_fba,
                        weight_thermo,
-                       weight_reactionRule,
+                       #weight_reactionRule,
                        max_rp_steps,
                        pathway_id,
                        rpFBAObj_name):
@@ -42,7 +42,15 @@ def runGlobalScore_mem(inputTar,
             for member in in_tf.getmembers():
                 if not member.name=='':
                     rpsbml = rpSBML.rpSBML(member_name, libsbml.readSBMLFromString(in_tf.extractfile(member).read().decode("utf-8")))
-                    globalScore = calculateGlobalScore(rpsbml, weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name)
+                    globalScore = calculateGlobalScore(rpsbml, 
+                                                       weight_rp_steps, 
+                                                       weight_selenzyme, 
+                                                       weight_fba, 
+                                                       weight_thermo, 
+                                                       #weight_reactionRule, 
+                                                       max_rp_steps, 
+                                                       pathway_id, 
+                                                       rpFBAObj_name)
                     data = libsbml.writeSBMLToString(rpsbml.document).encode('utf-8')
                     fiOut = io.BytesIO(data)
                     info = tarfile.TarInfo(member.name)
@@ -60,14 +68,15 @@ def runGlobalScore_hdd(inputTar,
                        weight_selenzyme,
                        weight_fba,
                        weight_thermo,
-                       weight_reactionRule,
+                       #weight_reactionRule,
                        max_rp_steps,
                        topX,
                        pathway_id,
                        rpFBAObj_name):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
-            tar = tarfile.open(fileobj=inputTar, mode='r:xz')
+            #tar = tarfile.open(fileobj=inputTar, mode='r:xz')
+            tar = tarfile.open(fileobj=inputTar, mode='r')
             tar.extractall(path=tmpInputFolder)
             tar.close()
             fileNames_score = {}
@@ -80,7 +89,7 @@ def runGlobalScore_hdd(inputTar,
                                                    weight_selenzyme,
                                                    weight_fba,
                                                    weight_thermo,
-                                                   weight_reactionRule,
+                                                   #weight_reactionRule,
                                                    max_rp_steps,
                                                    pathway_id,
                                                    rpFBAObj_name)
@@ -144,7 +153,7 @@ class RestQuery(Resource):
                            float(params['weight_selenzyme']),
                            float(params['weight_fba']),
                            float(params['weight_thermo']),
-                           float(params['weight_reactionRule']),
+                           #float(params['weight_reactionRule']),
                            float(params['max_rp_steps']),
                            str(params['pathway_id']),
                            str(params['rpFBAObj_name']))
@@ -157,7 +166,7 @@ class RestQuery(Resource):
                            float(params['weight_selenzyme']),
                            float(params['weight_fba']),
                            float(params['weight_thermo']),
-                           float(params['weight_reactionRule']),
+                           #float(params['weight_reactionRule']),
                            float(params['max_rp_steps']),
                            int(params['topX']),
                            str(params['pathway_id']),
