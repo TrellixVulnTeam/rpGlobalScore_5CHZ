@@ -42,14 +42,14 @@ def runGlobalScore_mem(inputTar,
             for member in in_tf.getmembers():
                 if not member.name=='':
                     rpsbml = rpSBML.rpSBML(member_name, libsbml.readSBMLFromString(in_tf.extractfile(member).read().decode("utf-8")))
-                    globalScore = calculateGlobalScore(rpsbml, 
-                                                       weight_rp_steps, 
-                                                       weight_selenzyme, 
-                                                       weight_fba, 
-                                                       weight_thermo, 
-                                                       #weight_reactionRule, 
-                                                       max_rp_steps, 
-                                                       pathway_id, 
+                    globalScore = calculateGlobalScore(rpsbml,
+                                                       weight_rp_steps,
+                                                       weight_selenzyme,
+                                                       weight_fba,
+                                                       weight_thermo,
+                                                       #weight_reactionRule,
+                                                       max_rp_steps,
+                                                       pathway_id,
                                                        rpFBAObj_name)
                     data = libsbml.writeSBMLToString(rpsbml.document).encode('utf-8')
                     fiOut = io.BytesIO(data)
@@ -182,4 +182,4 @@ api.add_resource(RestQuery, '/REST/Query')
 
 
 if __name__== "__main__":
-    app.run(host="0.0.0.0", port=8888, debug=True, threaded=True)
+    app.run(host="0.0.0.0", port=8888, debug=False, threaded=True)
