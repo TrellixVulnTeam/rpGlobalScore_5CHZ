@@ -7,6 +7,8 @@ import logging
 sys.path.insert(0, '/home/')
 import rpSBML
 
+
+#TODO: use rpSBML annottions function instead of manual
 ## Extract the reaction SMILES from an SBML, query selenzyme and write the results back to the SBML
 #
 # NOTE: all the scores are normalised by their maximal and minimal, and normalised to be higher is better
@@ -81,10 +83,9 @@ def calculateGlobalScore(rpsbml,
     #### group thermo ############
     ##############################
     #lower is better
-    groups_list = groups.getListOfGroups()
-    rp_group = groups_list[0]
-    annot = rp_group.getAnnotation()
-    brsynth_dict = rpsbml.readBRSYNTHAnnotation(annot)
+    rp_group = groups.getGroup(pathway_id)
+    #annot = rp_group.getAnnotation()
+    brsynth_dict = rpsbml.readBRSYNTHAnnotation(rp_group.getAnnotation())
     try:
         if 8901.2>=brsynth_dict['dfG_prime_o']['value']>=-7570.2:
             #if min is -7570.2 and max is 8901.2
@@ -118,15 +119,17 @@ def calculateGlobalScore(rpsbml,
     ############################
     #take the mean of the different normalised scores
     #globalScore = (norm_rule_score+norm_fba+norm_thermo+norm_selenzyme)/4.0
-    globalScore = (norm_selenzyme*weight_selenzyme+norm_steps*weight_rp_steps+norm_fba*weight_fba+norm_thermo*weight_thermo)/5.0
+    globalScore = (norm_selenzyme*weight_selenzyme+norm_steps*weight_rp_steps+norm_fba*weight_fba+norm_thermo*weight_thermo)/4.0
     #print('####### Global Score: '+str(globalScore)+' #########')
     #annot = groups.getAnnotation()
-    bag_brsynth = annot.getChild('RDF').getChild('BRSynth').getChild('brsynth')
+    #bag_brsynth = annot.getChild('RDF').getChild('BRSynth').getChild('brsynth')
     #globalScore_child = bag_brsynth.getChild('globalScore')
     ##########################
     #### write annotation ####
     ##########################
-    brsynth_annot = rp_pathway.getAnnotation().getChild('RDF').getChild('BRSynth').getChild('brsynth')
-    tmpAnnot = libsbml.XMLNode.convertStringToXMLNode('<brsynth:brsynth xmlns:brsynth="http://brsynth.eu"> <brsynth:global_score value="'+str(globalScore)+'" /> </brsynth:brsynth>')
-    brsynth_annot.addChild(tmpAnnot.getChild('global_score'))
+    #addUpdateBRSynth(self, sbase_obj, annot_header, value, units=None, isAlone=False, isList=False, isSort=True, meta_id=None)
+    rpsbml.addUpdateBRSynth(rp_group, global_score, globalScore, None)
+    #brsynth_annot = rp_pathway.getAnnotation().getChild('RDF').getChild('BRSynth').getChild('brsynth')
+    #tmpAnnot = libsbml.XMLNode.convertStringToXMLNode('<brsynth:brsynth xmlns:brsynth="http://brsynth.eu"> <brsynth:global_score value="'+str(globalScore)+'" /> </brsynth:brsynth>')
+    #brsynth_annot.addChild(tmpAnnot.getChild('global_score'))
     return globalScore
