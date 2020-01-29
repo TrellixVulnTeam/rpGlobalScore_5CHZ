@@ -55,7 +55,7 @@ def calculateGlobalScore(rpsbml,
             elif brsynth_dict['dfG_prime_m']['value']<thermo_floor:
                 norm_thermo = 0.0
             elif brsynth_dict['dfG_prime_m']['value']>thermo_ceil:
-                norm_thermo = 1.0    
+                norm_thermo = 1.0
         except (KeyError, TypeError) as e:
             norm_thermo = 1.0
         norm_thermo = 1.0-norm_thermo
