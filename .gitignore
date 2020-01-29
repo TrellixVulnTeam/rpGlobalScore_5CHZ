@@ -2,3 +2,4 @@
 *.tar.xz
 *.swp
 rpSBML.py
+__pycache__/

@@ -56,8 +56,11 @@ def runGlobalScore_hdd(inputTar_bytes,
                        weight_thermo,
                        max_rp_steps,
                        topX,
-                       pathway_id,
-                       rpFBAObj_name):
+                       thermo_ceil=8901.2,
+                       thermo_floor=-7570.2,
+                       fba_ceil=999999.0,
+                       fba_floor=0.0,
+                       pathway_id='rp_pathway'):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
             tar = tarfile.open(fileobj=inputTar_bytes, mode='r')
@@ -74,15 +77,18 @@ def runGlobalScore_hdd(inputTar_bytes,
                                                    weight_fba,
                                                    weight_thermo,
                                                    max_rp_steps,
-                                                   pathway_id,
-                                                   rpFBAObj_name)
+                                                   thermo_ceil,
+                                                   thermo_floor,
+                                                   fba_ceil,
+                                                   fba_floor,
+                                                   pathway_id)
                 fileNames_score[fileName] = globalScore
                 rpsbml.writeSBML(tmpOutputFolder)
             #sort the results
             top_fileNames = [k for k, v in sorted(fileNames_score.items(), key=lambda item: item[1])][:topX]
             with tarfile.open(fileobj=outputTar_bytes, mode='w:xz') as ot:
                 for sbml_path in glob.glob(tmpOutputFolder+'/*'):
-                    fileName = str(sbml_path.split('/')[-1].replace('.rpsbml', '').replace('sbml', '').replace('.xml', ''))
+                    fileName = str(sbml_path.split('/')[-1].replace('.rpsbml', '').replace('.sbml', '').replace('.xml', ''))
                     if fileName in top_fileNames:
                         fileName += '.rpsbml.xml'
                         info = tarfile.TarInfo(fileName)
@@ -100,8 +106,11 @@ def main(inputTar,
          weight_thermo,
          max_rp_steps,
          topX,
-         pathway_id,
-         rpFBAObj_name):
+         thermo_ceil=8901.2,
+         thermo_floor=-7570.2,
+         fba_ceil=999999.0,
+         fba_floor=0.0,
+         pathway_id='rp_pathway'):
     with open(inputTar, 'rb') as inputTar_bytes:
         outputTar_bytes = io.BytesIO()
         runGlobalScore_hdd(inputTar_bytes,
@@ -112,8 +121,11 @@ def main(inputTar,
                            weight_thermo,
                            max_rp_steps,
                            topX,
-                           pathway_id,
-                           rpFBAObj_name)
+                           thermo_ceil,
+                           thermo_floor,
+                           fba_ceil,
+                           fba_floor,
+                           pathway_id)
         ########## IMPORTANT #####
         outputTar_bytes.seek(0)
         ##########################

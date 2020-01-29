@@ -66,7 +66,7 @@ def calculateGlobalScore(rpsbml,
         for brs_key in brsynth_dict:
             if brs_key[:4]=='fba_':
                 #min-max feature scaling
-                norm_fba = (round(float(brsynth_dict[brs_key]), 4)-fba_floor)/(fba_ceil-fba_floor)
+                norm_fba = (round(float(brsynth_dict[brs_key]['value']), 4)-fba_floor)/(fba_ceil-fba_floor)
                 rpsbml.addUpdateBRSynth(reaction, 'norm_'+str(brs_key), norm_fba)
     ##############################
     ####### selenzyme ############
