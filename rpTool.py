@@ -19,8 +19,13 @@ def calculateGlobalScore(rpsbml,
                          weight_fba,
                          weight_thermo,
                          max_rp_steps,
+                         thermo_ceil=8901.2,
+                         thermo_floor=-7570.2,
+                         fba_ceil=999999.0,
+                         fba_floor=0.0,
                          pathway_id='rp_pathway'):
     groups = rpsbml.model.getPlugin('groups')
+    fbc = rpsbml.model.getPlugin('fbc')
     rp_pathway = groups.getGroup(pathway_id)
     members = rp_pathway.getListOfMembers()
     all_rule_score = 0.0
@@ -33,7 +38,7 @@ def calculateGlobalScore(rpsbml,
         ####### selenzyme ############
         #higher is better
         try:
-            #TODO: do a mean of the topX selenzyme score
+            #sum of mean of top selenzyme score
             selen_score = brsynth_dict['selenzyme'][sorted(brsynth_dict['selenzyme'], key=lambda kv: kv[1])[0]]
             top_selenzyme += selen_score
             rpsbml.addUpdateBRSynth(reaction, 'norm_selenzyme', selen_score/100.0)
@@ -44,11 +49,12 @@ def calculateGlobalScore(rpsbml,
         #WARNING: we will only take the dfG_prime_m value
         norm_thermo = 0.0
         try:
-            if 8901.2>=brsynth_dict['dfG_prime_m']['value']>=-7570.2:
-                norm_thermo = (brsynth_dict['dfG_prime_m']['value']+7570.2)/(8901.2+7570.2)
-            elif brsynth_dict['dfG_prime_m']['value']<-7570.2:
+            if thermo_ceil>=brsynth_dict['dfG_prime_m']['value']>=thermo_floor:
+                #min-max feature scaling
+                norm_thermo = (brsynth_dict['dfG_prime_m']['value']-thermo_floor)/(thermo_ceil-thermo_floor)
+            elif brsynth_dict['dfG_prime_m']['value']<thermo_floor:
                 norm_thermo = 0.0
-            elif brsynth_dict['dfG_prime_m']['value']>8901.2:
+            elif brsynth_dict['dfG_prime_m']['value']>thermo_ceil:
                 norm_thermo = 1.0    
         except (KeyError, TypeError) as e:
             norm_thermo = 1.0
@@ -59,7 +65,8 @@ def calculateGlobalScore(rpsbml,
         #return all the FBA values
         for brs_key in brsynth_dict:
             if brs_key[:4]=='fba_':
-                norm_fba = round(float(brsynth_dict[brs_key]), 4)/999999.0
+                #min-max feature scaling
+                norm_fba = (round(float(brsynth_dict[brs_key]), 4)-fba_floor)/(fba_ceil-fba_floor)
                 rpsbml.addUpdateBRSynth(reaction, 'norm_'+str(brs_key), norm_fba)
     ##############################
     ####### selenzyme ############
@@ -69,17 +76,26 @@ def calculateGlobalScore(rpsbml,
     norm_selenzyme = (top_selenzyme/float(len(members)))/100.0
     rpsbml.addUpdateBRSynth(rp_pathway, 'norm_selenzyme', norm_selenzyme)
     ##############################
-    ##### target FBA value ###
+    ##### target FBA value #######
     ##############################
     #higher is better
     #loop through all the different objectives and normalise the values
     for obj in fbc.getListOfObjectives():
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(obj.getAnnotation())
         try:
-            norm_fba = round(float(brsynth_dict['flux_value']['value']), 4)/999999.0
+            #min-max feature scaling for dfG_prime_m
+            norm_fba = (round(float(brsynth_dict['flux_value']), 4)-fba_floor)/(fba_ceil-fba_floor)
         except (KeyError, TypeError) as e:
             norm_fba = 0.0
         rpsbml.addUpdateBRSynth(obj, 'norm_flux_value', norm_fba)
+        #update the flux obj
+        for flux_obj in obj.getListOfAllElements():
+            #min-max feature scaling
+            try:
+                norm_fba = (round(float(), 4)-fba_floor)/(fba_ceil-fba_floor)
+            except (KeyError, TypeError) as e:
+                norm_fba = 0.0
+            rpsbml.addUpdateBRSynth(flux_obj, 'norm_flux_value', norm_fba)
     ##############################
     #### group thermo ############
     ##############################
@@ -87,11 +103,12 @@ def calculateGlobalScore(rpsbml,
     brsynth_dict = rpsbml.readBRSYNTHAnnotation(rp_pathway.getAnnotation())
     norm_thermo = 0.0
     try:
-        if 8901.2>=brsynth_dict['dfG_prime_m']['value']>=-7570.2:
-            norm_thermo = (brsynth_dict['dfG_prime_m']['value']+7570.2)/(8901.2+7570.2)
-        elif brsynth_dict['dfG_prime_m']['value']<-7570.2:
+        if thermo_ceil>=brsynth_dict['dfG_prime_m']['value']>=thermo_floor:
+            #min-max feature scaling
+            norm_thermo = (brsynth_dict['dfG_prime_m']['value']-thermo_floor)/(thermo_ceil-thermo_floor)
+        elif brsynth_dict['dfG_prime_m']['value']<thermo_floor:
             norm_thermo = 0.0
-        elif brsynth_dict['dfG_prime_m']['value']>8901.2:
+        elif brsynth_dict['dfG_prime_m']['value']>thermo_ceil:
             norm_thermo = 1.0
     except (KeyError, TypeError) as e:
         norm_thermo = 1.0
