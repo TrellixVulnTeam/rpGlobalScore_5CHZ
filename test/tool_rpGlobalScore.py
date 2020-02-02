@@ -18,11 +18,11 @@ def rpGlobalScoreUpload(inputTar,
                         max_rp_steps,
                         topX,
                         pathway_id,
-                        rpFBAObj_name,
+                        obj_name,
                         server_url):
     # Post request
     data = {'pathway_id': pathway_id,
-            'rpFBAObj_name': rpFBAObj_name,
+            'obj_name': obj_name,
             #'weight_reactionRule': weight_reactionRule,
             'weight_selenzyme': weight_selenzyme,
             'weight_fba': weight_fba,
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     parser.add_argument('-max_rp_steps', type=int)
     parser.add_argument('-topX', type=int)
     parser.add_argument('-pathway_id', type=str)
-    parser.add_argument('-rpFBAObj_name', type=str)
+    parser.add_argument('-obj_name', type=str)
     parser.add_argument('-server_url', type=str)
     params = parser.parse_args()
     rpGlobalScoreUpload(params.inputTar,
@@ -66,5 +66,5 @@ if __name__ == "__main__":
                         params.max_rp_steps,
                         params.topX,
                         params.pathway_id,
-                        params.rpFBAObj_name,
+                        params.obj_name,
                         params.server_url)
