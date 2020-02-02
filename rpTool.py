@@ -7,6 +7,8 @@ import logging
 sys.path.insert(0, '/home/')
 import rpSBML
 
+
+#TODO: use rpSBML annottions function instead of manual
 ## Extract the reaction SMILES from an SBML, query selenzyme and write the results back to the SBML
 #
 # NOTE: all the scores are normalised by their maximal and minimal, and normalised to be higher is better
@@ -16,120 +18,116 @@ def calculateGlobalScore(rpsbml,
                          weight_selenzyme,
                          weight_fba,
                          weight_thermo,
-                         #weight_reactionRule,
                          max_rp_steps,
-                         pathway_id='rp_pathway',
-                         obj_name='RP1_sink__restricted_biomass'):
+                         thermo_ceil=8901.2,
+                         thermo_floor=-7570.2,
+                         fba_ceil=999999.0,
+                         fba_floor=0.0,
+                         pathway_id='rp_pathway'):
     groups = rpsbml.model.getPlugin('groups')
+    fbc = rpsbml.model.getPlugin('fbc')
     rp_pathway = groups.getGroup(pathway_id)
     members = rp_pathway.getListOfMembers()
     all_rule_score = 0.0
     top_selenzyme = 0.0
+    #Loop through all the reactions
     for member in members:
         reaction = rpsbml.model.getReaction(member.getIdRef())
         annot = reaction.getAnnotation()
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(annot)
-        ####### rule_score ###########
-        #all_rule_score += brsynth_dict['rule_score']
-        #print('\trule_score: '+str(brsynth_dict['rule_score']))
         ####### selenzyme ############
+        #higher is better
         try:
-            #TODO: do a mean of the topX selenzyme score
-            top_selenzyme += brsynth_dict['selenzyme'][sorted(brsynth_dict['selenzyme'], key=lambda kv: kv[1])[0]]
-            #print('\tselenzyme: '+str(brsynth_dict['selenzyme'][sorted(brsynth_dict['selenzyme'], key=lambda kv: kv[1])[0]]))
+            #sum of mean of top selenzyme score
+            selen_score = brsynth_dict['selenzyme'][sorted(brsynth_dict['selenzyme'], key=lambda kv: kv[1])[0]]
+            top_selenzyme += selen_score
+            rpsbml.addUpdateBRSynth(reaction, 'norm_selenzyme', selen_score/100.0)
         except (IndexError, TypeError) as e:
             logging.warning('We are missing a selenzyme values')
-    ##############################
-    ####### rule_score ###########
-    ##############################
-    #lower is better
-    #norm_rule_score = all_rule_score/len(members)
-    #print('rule_score: '+str(norm_rule_score))
-    #norm_rule_score = 1.0-norm_rule_score
-    #print('rule_score: '+str(norm_rule_score))
+        ####### Thermo ############
+        #lower is better
+        #WARNING: we will only take the dfG_prime_m value
+        norm_thermo = 0.0
+        try:
+            if thermo_ceil>=brsynth_dict['dfG_prime_m']['value']>=thermo_floor:
+                #min-max feature scaling
+                norm_thermo = (brsynth_dict['dfG_prime_m']['value']-thermo_floor)/(thermo_ceil-thermo_floor)
+            elif brsynth_dict['dfG_prime_m']['value']<thermo_floor:
+                norm_thermo = 0.0
+            elif brsynth_dict['dfG_prime_m']['value']>thermo_ceil:
+                norm_thermo = 1.0
+        except (KeyError, TypeError) as e:
+            norm_thermo = 1.0
+        norm_thermo = 1.0-norm_thermo
+        rpsbml.addUpdateBRSynth(reaction, 'norm_dfG_prime_m', norm_thermo)
+        ####### FBA ##############
+        #higher is better
+        #return all the FBA values
+        for brs_key in brsynth_dict:
+            if brs_key[:4]=='fba_':
+                #min-max feature scaling
+                norm_fba = (round(float(brsynth_dict[brs_key]['value']), 4)-fba_floor)/(fba_ceil-fba_floor)
+                rpsbml.addUpdateBRSynth(reaction, 'norm_'+str(brs_key), norm_fba)
     ##############################
     ####### selenzyme ############
     ##############################
     #higher is better
     #NOTE: that missing selenzyme value will be considered 0.0 since we divide by the number of members
     norm_selenzyme = (top_selenzyme/float(len(members)))/100.0
-    #print('selenzyme: '+str(norm_selenzyme))
+    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_selenzyme', norm_selenzyme)
     ##############################
-    ##### target FBA value ###
+    ##### target FBA value #######
     ##############################
     #higher is better
-    norm_fba = 0.0
-    try:
-        #TODO: need to determine the best value of the maximal flux possible
-        # look at the growth flux --> NO it dosn't work that way
-        fbc = rpsbml.model.getPlugin('fbc')
-        objective = fbc.getObjective(obj_name)
-        brs_annot = rpsbml.readBRSYNTHAnnotation(objective.getAnnotation())
-        print(brs_annot)
-        norm_fba = round(float(brs_annot['flux_value']), 4)/999999.0
-        #annot = objective.getAnnotation()
-        #brsynth_annot = annot.getChild('RDF').getChild('BRSynth').getChild('brsynth')
-        #for i in range(brsynth_annot.getNumChildren()):
-        #    child = brsynth_annot.getChild(i)
-        #    if child.getName()=='':
-                #if the min is -999999.0 and max 999999.0 # ONLY use if reactions are reversible
-                #norm_fba = (float(child.getAttrValue('value'))+999999.0)/(999999.0+999999.0)
-                #if the min is 0.0 and max 999999.0
-                #print('FBA: '+str(round(float(child.getAttrValue('value')), 4)))
-        #        norm_fba = round(float(child.getAttrValue('value')), 4)/999999.0
-    except (KeyError, TypeError) as e:
-        norm_fba = 0.0
-    #print('FBA: '+str(norm_fba))
+    #loop through all the different objectives and normalise the values
+    for obj in fbc.getListOfObjectives():
+        brsynth_dict = rpsbml.readBRSYNTHAnnotation(obj.getAnnotation())
+        try:
+            #min-max feature scaling for dfG_prime_m
+            norm_fba = (round(float(brsynth_dict['flux_value']), 4)-fba_floor)/(fba_ceil-fba_floor)
+        except (KeyError, TypeError) as e:
+            norm_fba = 0.0
+        rpsbml.addUpdateBRSynth(obj, 'norm_flux_value', norm_fba)
+        #update the flux obj
+        for flux_obj in obj.getListOfAllElements():
+            #min-max feature scaling
+            try:
+                norm_fba = (round(float(), 4)-fba_floor)/(fba_ceil-fba_floor)
+            except (KeyError, TypeError) as e:
+                norm_fba = 0.0
+            rpsbml.addUpdateBRSynth(flux_obj, 'norm_flux_value', norm_fba)
     ##############################
     #### group thermo ############
     ##############################
     #lower is better
-    groups_list = groups.getListOfGroups()
-    rp_group = groups_list[0]
-    annot = rp_group.getAnnotation()
-    brsynth_dict = rpsbml.readBRSYNTHAnnotation(annot)
+    brsynth_dict = rpsbml.readBRSYNTHAnnotation(rp_pathway.getAnnotation())
+    norm_thermo = 0.0
     try:
-        if 8901.2>=brsynth_dict['dfG_prime_o']['value']>=-7570.2:
-            #if min is -7570.2 and max is 8901.2
-            #print('thermo: '+str(brsynth_dict['dfG_prime_o']['value']))
-            norm_thermo = (brsynth_dict['dfG_prime_o']['value']+7570.2)/(8901.2+7570.2)
-            #if min is 8901.2 and max is -7570.2
-            #WARNING: Does not work
-            #norm_thermo = (brsynth_dict['dfG_prime_o']['value']+8901.2)/(-7570.2-8901.2)
-        elif brsynth_dict['dfG_prime_o']['value']<-7570.2:
+        if thermo_ceil>=brsynth_dict['dfG_prime_m']['value']>=thermo_floor:
+            #min-max feature scaling
+            norm_thermo = (brsynth_dict['dfG_prime_m']['value']-thermo_floor)/(thermo_ceil-thermo_floor)
+        elif brsynth_dict['dfG_prime_m']['value']<thermo_floor:
             norm_thermo = 0.0
-        elif brsynth_dict['dfG_prime_o']['value']>8901.2:
+        elif brsynth_dict['dfG_prime_m']['value']>thermo_ceil:
             norm_thermo = 1.0
     except (KeyError, TypeError) as e:
         norm_thermo = 1.0
     norm_thermo = 1.0-norm_thermo
-    #print('Thermo: '+str(norm_thermo))
+    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', norm_thermo)
     ############################
     ##### length of members ####
     ############################
     #lower is better
-    #print('steps: '+str(len(members)))
     if len(members)>max_rp_steps:
         logging.warning('There are more steps than specified')
         norm_steps = 1.0
     else:
         norm_steps = (float(len(members))-1.0)/(float(max_rp_steps)-1.0)
     norm_steps = 1.0-norm_steps
-    #print('Steps: '+str(norm_steps))
+    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_steps', norm_steps)
     ############################
     ##### global score #########
     ############################
-    #take the mean of the different normalised scores
-    #globalScore = (norm_rule_score+norm_fba+norm_thermo+norm_selenzyme)/4.0
     globalScore = (norm_selenzyme*weight_selenzyme+norm_steps*weight_rp_steps+norm_fba*weight_fba+norm_thermo*weight_thermo)/4.0
-    #print('####### Global Score: '+str(globalScore)+' #########')
-    #annot = groups.getAnnotation()
-    bag_brsynth = annot.getChild('RDF').getChild('BRSynth').getChild('brsynth')
-    #globalScore_child = bag_brsynth.getChild('globalScore')
-    ##########################
-    #### write annotation ####
-    ##########################
-    brsynth_annot = rp_pathway.getAnnotation().getChild('RDF').getChild('BRSynth').getChild('brsynth')
-    tmpAnnot = libsbml.XMLNode.convertStringToXMLNode('<brsynth:brsynth xmlns:brsynth="http://brsynth.eu"> <brsynth:global_score value="'+str(globalScore)+'" /> </brsynth:brsynth>')
-    brsynth_annot.addChild(tmpAnnot.getChild('global_score'))
+    rpsbml.addUpdateBRSynth(rp_pathway, 'global_score', globalScore)
     return globalScore
