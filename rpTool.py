@@ -23,7 +23,8 @@ def calculateGlobalScore(rpsbml,
                          thermo_floor=-7570.2,
                          fba_ceil=999999.0,
                          fba_floor=0.0,
-                         pathway_id='rp_pathway'):
+                         pathway_id='rp_pathway',
+                         obj_name='RP1_sink__restricted_biomass'):
     groups = rpsbml.model.getPlugin('groups')
     fbc = rpsbml.model.getPlugin('fbc')
     rp_pathway = groups.getGroup(pathway_id)
@@ -63,8 +64,10 @@ def calculateGlobalScore(rpsbml,
         ####### FBA ##############
         #higher is better
         #return all the FBA values
+        norm_fba = 0.0
         for brs_key in brsynth_dict:
-            if brs_key[:4]=='fba_':
+            #if brs_key[:4]=='fba_':
+            if brs_key==obj_name:
                 #min-max feature scaling
                 norm_fba = (round(float(brsynth_dict[brs_key]['value']), 4)-fba_floor)/(fba_ceil-fba_floor)
                 rpsbml.addUpdateBRSynth(reaction, 'norm_'+str(brs_key), norm_fba)

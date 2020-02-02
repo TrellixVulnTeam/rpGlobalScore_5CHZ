@@ -60,7 +60,8 @@ def runGlobalScore_hdd(inputTar_bytes,
                        thermo_floor=-7570.2,
                        fba_ceil=999999.0,
                        fba_floor=0.0,
-                       pathway_id='rp_pathway'):
+                       pathway_id='rp_pathway',
+                       obj_name='RP1_sink__restricted_biomass'):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
             tar = tarfile.open(fileobj=inputTar_bytes, mode='r')
@@ -110,7 +111,8 @@ def main(inputTar,
          thermo_floor=-7570.2,
          fba_ceil=999999.0,
          fba_floor=0.0,
-         pathway_id='rp_pathway'):
+         pathway_id='rp_pathway',
+         obj_name='RP1_sink__restricted_biomass'):
     with open(inputTar, 'rb') as inputTar_bytes:
         outputTar_bytes = io.BytesIO()
         runGlobalScore_hdd(inputTar_bytes,
@@ -125,7 +127,8 @@ def main(inputTar,
                            thermo_floor,
                            fba_ceil,
                            fba_floor,
-                           pathway_id)
+                           pathway_id,
+                           obj_name)
         ########## IMPORTANT #####
         outputTar_bytes.seek(0)
         ##########################
