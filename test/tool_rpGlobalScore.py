@@ -4,6 +4,13 @@ import requests
 import argparse
 import json
 
+"""
+python tool_rpGlobalScore.py -input Galaxy832-[rpFBA].tar -output test_output.tar -weight_selenzyme 1.0 -weight_fba 1.0 -weight_thermo 1.0 -weight_rp_steps 1.0 -max_rp_steps 4 -topX 10 -thermo_ceil 8901.2 -thermo_floor -7570.2 -fba_ceil 999999.0 -fba_floor 0.0 -input_format tar -pathway_id rp_pathway -obj_name RP1_sink__restricted_biomass -server_url http://0.0.0.0:8881/REST
+
+python tool_rpGlobalScore.py -input rp_1_1_rpFBA.rpsbml.xml -output test_output.rpsbml.xml -weight_selenzyme 1.0 -weight_fba 1.0 -weight_thermo 1.0 -weight_rp_steps 1.0 -max_rp_steps 4 -topX 10 -thermo_ceil 8901.2 -thermo_floor -7570.2 -fba_ceil 999999.0 -fba_floor 0.0 -input_format sbml -pathway_id rp_pathway -obj_name RP1_sink__restricted_biomass -server_url http://0.0.0.0:8881/REST
+
+"""
+
 ##
 #
 #
@@ -48,8 +55,9 @@ def rpGlobalScoreUpload(inputTar,
 #
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Given an SBML, extract the reaction rules and pass them to Selenzyme REST service and write the results to the SBML')
-    parser.add_argument('-inputTar', type=str)
-    parser.add_argument('-outputTar', type=str)
+    parser.add_argument('-input', type=str)
+    parser.add_argument('-output', type=str)
+    parser.add_argument('-input_format', type=str)
     parser.add_argument('-weight_rp_steps', type=float)
     parser.add_argument('-weight_selenzyme', type=float)
     parser.add_argument('-weight_fba', type=float)
@@ -64,8 +72,8 @@ if __name__ == "__main__":
     parser.add_argument('-obj_name', type=str)
     parser.add_argument('-server_url', type=str)
     params = parser.parse_args()
-    rpGlobalScoreUpload(params.inputTar,
-                        params.outputTar,
+    rpGlobalScoreUpload(params.input,
+                        params.output,
                         params.weight_rp_steps,
                         params.weight_selenzyme,
                         params.weight_fba,

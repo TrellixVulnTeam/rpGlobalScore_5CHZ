@@ -78,7 +78,7 @@ def runGlobalScore_hdd(inputTar,
                        obj_name='RP1_sink__restricted_biomass'):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
-            tar = tarfile.open(fileobj=inputTar_bytes, mode='r')
+            tar = tarfile.open(fileobj=inputTar, mode='r')
             tar.extractall(path=tmpInputFolder)
             tar.close()
             fileNames_score = {}
