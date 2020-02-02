@@ -68,20 +68,22 @@ def runGlobalScore_hdd(inputTar,
                        weight_selenzyme,
                        weight_fba,
                        weight_thermo,
-                       #weight_reactionRule,
                        max_rp_steps,
                        topX,
-                       pathway_id,
-                       obj_name):
+                       thermo_ceil=8901.2,
+                       thermo_floor=-7570.2,
+                       fba_ceil=999999.0,
+                       fba_floor=0.0,
+                       pathway_id='rp_pathway',
+                       obj_name='RP1_sink__restricted_biomass'):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
-            #tar = tarfile.open(fileobj=inputTar, mode='r:xz')
-            tar = tarfile.open(fileobj=inputTar, mode='r')
+            tar = tarfile.open(fileobj=inputTar_bytes, mode='r')
             tar.extractall(path=tmpInputFolder)
             tar.close()
             fileNames_score = {}
             for sbml_path in glob.glob(tmpInputFolder+'/*'):
-                fileName = sbml_path.split('/')[-1].replace('rpsbml', '').replace('.sbml', '').replace('.xml', '')
+                fileName = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '').replace('.rpsbml', '')
                 rpsbml = rpSBML.rpSBML(fileName)
                 rpsbml.readSBML(sbml_path)
                 globalScore = calculateGlobalScore(rpsbml,
@@ -89,8 +91,11 @@ def runGlobalScore_hdd(inputTar,
                                                    weight_selenzyme,
                                                    weight_fba,
                                                    weight_thermo,
-                                                   #weight_reactionRule,
                                                    max_rp_steps,
+                                                   thermo_ceil,
+                                                   thermo_floor,
+                                                   fba_ceil,
+                                                   fba_floor,
                                                    pathway_id,
                                                    obj_name)
                 fileNames_score[fileName] = globalScore
@@ -99,7 +104,7 @@ def runGlobalScore_hdd(inputTar,
             top_fileNames = [k for k, v in sorted(fileNames_score.items(), key=lambda item: item[1])][:topX]
             with tarfile.open(fileobj=outputTar, mode='w:xz') as ot:
                 for sbml_path in glob.glob(tmpOutputFolder+'/*'):
-                    fileName = str(sbml_path.split('/')[-1].replace('rpsbml', '').replace('.sbml', '').replace('.xml', ''))
+                    fileName = str(sbml_path.split('/')[-1].replace('.rpsbml', '').replace('.sbml', '').replace('.xml', ''))
                     if fileName in top_fileNames:
                         fileName += '.rpsbml.xml'
                         info = tarfile.TarInfo(fileName)
@@ -166,9 +171,12 @@ class RestQuery(Resource):
                            float(params['weight_selenzyme']),
                            float(params['weight_fba']),
                            float(params['weight_thermo']),
-                           #float(params['weight_reactionRule']),
                            float(params['max_rp_steps']),
                            int(params['topX']),
+                           float(params['thermo_ceil']),
+                           float(params['thermo_floor']),
+                           float(params['fba_ceil']),
+                           float(params['fba_floor']),
                            str(params['pathway_id']),
                            str(params['obj_name']))
         ###### IMPORTANT ######
