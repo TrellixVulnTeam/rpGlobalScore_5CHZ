@@ -19,7 +19,7 @@ def calculateGlobalScore(rpsbml,
                          #weight_reactionRule,
                          max_rp_steps,
                          pathway_id='rp_pathway',
-                         rpFBAObj_name='rpFBA_obj'):
+                         obj_name='RP1_sink__restricted_biomass'):
     groups = rpsbml.model.getPlugin('groups')
     rp_pathway = groups.getGroup(pathway_id)
     members = rp_pathway.getListOfMembers()
@@ -63,17 +63,20 @@ def calculateGlobalScore(rpsbml,
         #TODO: need to determine the best value of the maximal flux possible
         # look at the growth flux --> NO it dosn't work that way
         fbc = rpsbml.model.getPlugin('fbc')
-        objective = fbc.getObjective(rpFBAObj_name)
-        annot = objective.getAnnotation()
-        brsynth_annot = annot.getChild('RDF').getChild('BRSynth').getChild('brsynth')
-        for i in range(brsynth_annot.getNumChildren()):
-            child = brsynth_annot.getChild(i)
-            if child.getName()=='objective_value':
+        objective = fbc.getObjective(obj_name)
+        brs_annot = rpsbml.readBRSYNTHAnnotation(objective.getAnnotation())
+        print(brs_annot)
+        norm_fba = round(float(brs_annot['flux_value']), 4)/999999.0
+        #annot = objective.getAnnotation()
+        #brsynth_annot = annot.getChild('RDF').getChild('BRSynth').getChild('brsynth')
+        #for i in range(brsynth_annot.getNumChildren()):
+        #    child = brsynth_annot.getChild(i)
+        #    if child.getName()=='':
                 #if the min is -999999.0 and max 999999.0 # ONLY use if reactions are reversible
                 #norm_fba = (float(child.getAttrValue('value'))+999999.0)/(999999.0+999999.0)
                 #if the min is 0.0 and max 999999.0
                 #print('FBA: '+str(round(float(child.getAttrValue('value')), 4)))
-                norm_fba = round(float(child.getAttrValue('value')), 4)/999999.0
+        #        norm_fba = round(float(child.getAttrValue('value')), 4)/999999.0
     except (KeyError, TypeError) as e:
         norm_fba = 0.0
     #print('FBA: '+str(norm_fba))
