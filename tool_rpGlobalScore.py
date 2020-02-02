@@ -6,7 +6,9 @@ Create on September 21 2019
 @author: Melchior du Lac
 @description: Galacxy specific script to call the function
 
-python tool_rpGlobalScore.py -sbml test_rpThermo.rpsbml.xml -outputTar test_output.tar -weight_selenzyme 1.0 -weight_fba 1.0 -weight_thermo 1.0 -weight_rp_steps 1.0 -max_rp_steps 4 -topX 10 -thermo_ceil 8901.2 -thermo_floor -7570.2 -fba_ceil 999999.0 -fba_floor 0.0 -pathway_id rp_pathway 
+python tool_rpGlobalScore.py -input Galaxy832-[rpFBA].tar -output test_output.tar -weight_selenzyme 1.0 -weight_fba 1.0 -weight_thermo 1.0 -weight_rp_steps 1.0 -max_rp_steps 4 -topX 10 -thermo_ceil 8901.2 -thermo_floor -7570.2 -fba_ceil 999999.0 -fba_floor 0.0 -input_format tar -pathway_id rp_pathway -obj_name RP1_sink__restricted_biomass 
+
+python tool_rpGlobalScore.py -input rp_1_1_rpFBA.rpsbml.xml -output test_output.rpsbml.xml -weight_selenzyme 1.0 -weight_fba 1.0 -weight_thermo 1.0 -weight_rp_steps 1.0 -max_rp_steps 4 -topX 10 -thermo_ceil 8901.2 -thermo_floor -7570.2 -fba_ceil 999999.0 -fba_floor 0.0 -input_format sbml -pathway_id rp_pathway -obj_name RP1_sink__restricted_biomass 
 
 """
 
@@ -19,6 +21,7 @@ import tempfile
 import tarfile
 import glob
 import shutil
+import os
 
 
 ##
@@ -43,9 +46,6 @@ if __name__ == "__main__":
     parser.add_argument('-obj_name', type=str)
     params = parser.parse_args()
     if params.input_format=='tar':
-        if params.inputTar=='None' or params.inputTar==None or params.inputTar=='':
-            logging.error('Cannot have no SBML and no TAR input')
-            exit(0)
         rpToolServe.main(params.input,
                          params.output,
                          params.weight_rp_steps,
