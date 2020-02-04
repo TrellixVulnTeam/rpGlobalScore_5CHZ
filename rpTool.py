@@ -31,7 +31,8 @@ def calculateGlobalScore(rpsbml,
     rp_pathway = groups.getGroup(pathway_id)
     members = rp_pathway.getListOfMembers()
     all_rule_score = 0.0
-    top_selenzyme = 0.0
+    all_norm_fba = 0.0
+    all_top_selenzyme = 0.0
     all_norm_thermo = 0.0
     #Loop through all the reactions
     for member in members:
@@ -42,11 +43,11 @@ def calculateGlobalScore(rpsbml,
         #higher is better
         try:
             #sum of mean of top selenzyme score
-            selen_score = brsynth_dict['selenzyme'][sorted(brsynth_dict['selenzyme'], key=lambda kv: kv[1])[0]]
-            top_selenzyme += selen_score
-            rpsbml.addUpdateBRSynth(reaction, 'norm_selenzyme', selen_score/100.0)
+            top_selenzyme = brsynth_dict['selenzyme'][sorted(brsynth_dict['selenzyme'], key=lambda kv: kv[1])[0]]
+            all_top_selenzyme += top_selenzyme
+            rpsbml.addUpdateBRSynth(reaction, 'norm_selenzyme', top_selenzyme/100.0)
         except (IndexError, TypeError) as e:
-            logging.warning('We are missing a selenzyme values')
+            logging.warning('Missing selenzyme values for reaction: '+str(member.getIdRef()))
         ####### Thermo ############
         #lower is better
         #WARNING: we will only take the dfG_prime_m value
@@ -59,28 +60,29 @@ def calculateGlobalScore(rpsbml,
                 norm_thermo = 0.0
             elif brsynth_dict[thermo_id]['value']>thermo_ceil:
                 norm_thermo = 1.0
+            norm_thermo = 1.0-norm_thermo
+            all_norm_thermo += norm_thermo
+            rpsbml.addUpdateBRSynth(reaction, 'norm_dfG_prime_m', norm_thermo)
         except (KeyError, TypeError) as e:
-            norm_thermo = 1.0
-        norm_thermo = 1.0-norm_thermo
-        all_norm_thermo += norm_thermo
-        rpsbml.addUpdateBRSynth(reaction, 'norm_dfG_prime_m', norm_thermo)
+            logging.warning('Cannot find the thermo: '+str(thermo_id)+' for the reaction: '+str(member.getIdRef()))
+            #norm_thermo = 1.0
         ####### FBA ##############
         #higher is better
         #return all the FBA values
         norm_fba = 0.0
-        for brs_key in brsynth_dict:
-            #if brs_key[:4]=='fba_':
-            if brs_key==obj_name:
+        try:
+            reac_objective_id = 'fba_'+objective_id
+            if fba_ceil>=brsynth_dict[reac_objective_id]['value']>=fba_floor:
                 #min-max feature scaling
-                norm_fba = (round(float(brsynth_dict[brs_key]['value']), 4)-fba_floor)/(fba_ceil-fba_floor)
-                rpsbml.addUpdateBRSynth(reaction, 'norm_'+str(brs_key), norm_fba)
-    ##############################
-    ####### selenzyme ############
-    ##############################
-    #higher is better
-    #NOTE: that missing selenzyme value will be considered 0.0 since we divide by the number of members
-    norm_selenzyme = (top_selenzyme/float(len(members)))/100.0
-    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_selenzyme', norm_selenzyme)
+                norm_fba = (brsynth_dict[reac_objective_id]['value']-fba_floor)/(fba_ceil-fba_floor)
+            elif brsynth_dict[reac_objective_id]['value']<=fba_floor:
+                norm_fba = 0.0
+            elif brsynth_dict[reac_objective_id]['value']>fba_ceil:
+                norm_fba = 1.0
+            all_norm_fba += norm_fba
+            rpsbml.addUpdateBRSynth(reaction, 'norm_'+reac_objective_id, norm_fba)
+        except (KeyError, TypeError) as e:
+            logging.warning('Cannot find the objective: '+str(objective_id)+' for the reaction: '+str(member.getIdRef()))
     ##############################
     ##### target FBA value #######
     ##############################
@@ -92,12 +94,18 @@ def calculateGlobalScore(rpsbml,
         if objective.getId()==objective_id:
             obj_objective = objective
             break
+    print('############')
+    print([i.getId() for i in fbc.getListOfObjectives()])
+    print(fbc)
+    print(obj_objective)
+    print('############')
     if obj_objective:
         #for obj in fbc.getListOfObjectives():
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(obj_objective.getAnnotation())
+        print(brsynth_dict)
         try:
             #min-max feature scaling for dfG_prime_m
-            if fba_ceil>=float(brsynth_dict['flux_value']>=fba_floor:
+            if fba_ceil>=float(brsynth_dict['flux_value'])>=fba_floor:
                 norm_fba = (round(float(brsynth_dict['flux_value']), 4)-fba_floor)/(fba_ceil-fba_floor)
             elif float(brsynth_dict['flux_value'])<fba_floor:
                 norm_fba = 0.0
@@ -141,7 +149,8 @@ def calculateGlobalScore(rpsbml,
     rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', norm_thermo)
     '''
     #if you want the mean of each reaction normalisation
-    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', all_norm_thermo/len(members))
+    norm_thermo = (all_norm_thermo/float(len(members)))/100.0
+    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', norm_thermo)
     ############################
     ##### length of members ####
     ############################
@@ -153,9 +162,17 @@ def calculateGlobalScore(rpsbml,
         norm_steps = (float(len(members))-1.0)/(float(max_rp_steps)-1.0)
     norm_steps = 1.0-norm_steps
     rpsbml.addUpdateBRSynth(rp_pathway, 'norm_steps', norm_steps)
+    ##############################
+    ####### selenzyme ############
+    ##############################
+    #higher is better
+    #NOTE: that missing selenzyme value will be considered 0.0 since we divide by the number of members
+    norm_selenzyme = (all_top_selenzyme/float(len(members)))/100.0
+    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_selenzyme', norm_selenzyme)
     ############################
     ##### global score #########
     ############################
-    globalScore = (norm_selenzyme*weight_selenzyme+norm_steps*weight_rp_steps+norm_fba*weight_fba+norm_thermo*weight_thermo)/4.0
+    #globalScore = (norm_selenzyme*weight_selenzyme+norm_steps*weight_rp_steps+norm_fba*weight_fba+norm_thermo*weight_thermo)/4.0
+    globalScore = (norm_selenzyme*weight_selenzyme+norm_steps*weight_rp_steps+norm_fba*weight_fba+all_norm_thermo*weight_thermo)/4.0
     rpsbml.addUpdateBRSynth(rp_pathway, 'global_score', globalScore)
     return globalScore
