@@ -75,7 +75,8 @@ def runGlobalScore_hdd(inputTar,
                        fba_ceil=999999.0,
                        fba_floor=0.0,
                        pathway_id='rp_pathway',
-                       obj_name='RP1_sink__restricted_biomass'):
+                       objective_id='obj_rpFBA_frac',
+                       thermo_id='dfG_prime_m'):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
             tar = tarfile.open(fileobj=inputTar, mode='r')
@@ -97,7 +98,8 @@ def runGlobalScore_hdd(inputTar,
                                                    fba_ceil,
                                                    fba_floor,
                                                    pathway_id,
-                                                   obj_name)
+                                                   objective_id,
+                                                   thermo_id)
                 fileNames_score[fileName] = globalScore
                 rpsbml.writeSBML(tmpOutputFolder)
             #sort the results
@@ -178,7 +180,8 @@ class RestQuery(Resource):
                            float(params['fba_ceil']),
                            float(params['fba_floor']),
                            str(params['pathway_id']),
-                           str(params['obj_name']))
+                           str(params['objective_id']),
+                           str(params['thermo_id']))
         ###### IMPORTANT ######
         outputTar.seek(0)
         #######################
