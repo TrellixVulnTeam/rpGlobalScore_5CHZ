@@ -1,1 +1,1 @@
-FROM brsynth/rprest
+FROM brsynth/rprest:dev
