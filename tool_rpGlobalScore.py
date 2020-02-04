@@ -23,6 +23,22 @@ import glob
 import shutil
 import os
 
+'''
+def calculateGlobalScore(rpsbml,
+                         weight_rp_steps,
+                         weight_selenzyme,
+                         weight_fba,
+                         weight_thermo,
+                         max_rp_steps,
+                         thermo_ceil=8901.2,
+                         thermo_floor=-7570.2,
+                         fba_ceil=999999.0,
+                         fba_floor=0.0,
+                         pathway_id='rp_pathway',
+                         objective_id='obj_rpFBA_frac',
+                         thermo_id='dfG_prime_m'):
+
+'''
 
 ##
 #
@@ -43,7 +59,8 @@ if __name__ == "__main__":
     parser.add_argument('-fba_ceil', type=float)
     parser.add_argument('-fba_floor', type=float)
     parser.add_argument('-pathway_id', type=str)
-    parser.add_argument('-obj_name', type=str)
+    parser.add_argument('-objective_id', type=str)
+    parser.add_argument('-thermo_id', type=str)
     params = parser.parse_args()
     if params.input_format=='tar':
         rpToolServe.main(params.input,
@@ -59,7 +76,8 @@ if __name__ == "__main__":
                          params.fba_ceil,
                          params.fba_floor,
                          params.pathway_id,
-                         params.obj_name)
+                         params.objective_id,
+                         params.thermo_id)
     elif params.input_format=='sbml':
         #make the tar.xz 
         with tempfile.TemporaryDirectory() as tmpOutputFolder:
@@ -83,7 +101,8 @@ if __name__ == "__main__":
                              params.fba_ceil,
                              params.fba_floor,
                              params.pathway_id,
-                             params.obj_name)
+                             params.objective_id,
+                             params.thermo_id)
             with tarfile.open(output_tar) as outTar:
                 outTar.extractall(tmpOutputFolder)
             out_file = glob.glob(tmpOutputFolder+'/*.rpsbml.xml')

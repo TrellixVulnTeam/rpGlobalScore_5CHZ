@@ -61,8 +61,8 @@ def runGlobalScore_hdd(inputTar_bytes,
                        fba_ceil=999999.0,
                        fba_floor=0.0,
                        pathway_id='rp_pathway',
-		       objective_id='obj_rpFBA_frac',
-		       thermo_id='dfG_prime_m'):
+                       objective_id='obj_rpFBA_frac',
+                       thermo_id='dfG_prime_m'):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
             tar = tarfile.open(fileobj=inputTar_bytes, mode='r')
@@ -133,7 +133,7 @@ def main(inputTar,
                            fba_floor,
                            pathway_id,
                            objective_id,
-			   thermo_id)
+                           thermo_id)
         ########## IMPORTANT #####
         outputTar_bytes.seek(0)
         ##########################
