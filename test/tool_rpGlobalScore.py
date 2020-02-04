@@ -6,7 +6,9 @@ Create on September 21 2019
 @author: Melchior du Lac
 @description: Galacxy specific script to call the function
 
-python tool_rpGlobalScore.py -sbml test_rpThermo.rpsbml.xml -outputTar test_output.tar -weight_selenzyme 1.0 -weight_fba 1.0 -weight_thermo 1.0 -weight_rp_steps 1.0 -max_rp_steps 4 -topX 10 -thermo_ceil 8901.2 -thermo_floor -7570.2 -fba_ceil 999999.0 -fba_floor 0.0 -pathway_id rp_pathway 
+python tool_rpGlobalScore.py -input Galaxy832-[rpFBA].tar -output test_output.tar -weight_selenzyme 1.0 -weight_fba 1.0 -weight_thermo 1.0 -weight_rp_steps 1.0 -max_rp_steps 4 -topX 10 -thermo_ceil 8901.2 -thermo_floor -7570.2 -fba_ceil 999999.0 -fba_floor 0.0 -input_format tar -pathway_id rp_pathway -obj_name RP1_sink__restricted_biomass 
+
+python tool_rpGlobalScore.py -input rp_1_1_rpFBA.rpsbml.xml -output test_output.rpsbml.xml -weight_selenzyme 1.0 -weight_fba 1.0 -weight_thermo 1.0 -weight_rp_steps 1.0 -max_rp_steps 4 -topX 10 -thermo_ceil 8901.2 -thermo_floor -7570.2 -fba_ceil 999999.0 -fba_floor 0.0 -input_format sbml -pathway_id rp_pathway -obj_name RP1_sink__restricted_biomass 
 
 """
 
@@ -17,16 +19,35 @@ import rpToolServe
 import argparse
 import tempfile
 import tarfile
+import glob
+import shutil
+import os
 
+'''
+def calculateGlobalScore(rpsbml,
+                         weight_rp_steps,
+                         weight_selenzyme,
+                         weight_fba,
+                         weight_thermo,
+                         max_rp_steps,
+                         thermo_ceil=8901.2,
+                         thermo_floor=-7570.2,
+                         fba_ceil=999999.0,
+                         fba_floor=0.0,
+                         pathway_id='rp_pathway',
+                         objective_id='obj_rpFBA_frac',
+                         thermo_id='dfG_prime_m'):
+
+'''
 
 ##
 #
 #
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Given an SBML, extract the reaction rules and pass them to Selenzyme REST service and write the results to the SBML')
-    parser.add_argument('-inputTar', type=str)
-    parser.add_argument('-sbml', type=str)
-    parser.add_argument('-outputTar', type=str)
+    parser.add_argument('-input', type=str)
+    parser.add_argument('-input_format', type=str)
+    parser.add_argument('-output', type=str)
     parser.add_argument('-weight_selenzyme', type=float)
     parser.add_argument('-weight_fba', type=float)
     parser.add_argument('-weight_thermo', type=float)
@@ -38,13 +59,12 @@ if __name__ == "__main__":
     parser.add_argument('-fba_ceil', type=float)
     parser.add_argument('-fba_floor', type=float)
     parser.add_argument('-pathway_id', type=str)
+    parser.add_argument('-objective_id', type=str)
+    parser.add_argument('-thermo_id', type=str)
     params = parser.parse_args()
-    if params.sbml=='None' or params.sbml==None or params.sbml=='':
-        if params.inputTar=='None' or params.inputTar==None or params.inputTar=='':
-            logging.error('Cannot have no SBML and no TAR input')
-            exit(0)
-        rpToolServe.main(params.inputTar,
-                         params.outputTar,
+    if params.input_format=='tar':
+        rpToolServe.main(params.input,
+                         params.output,
                          params.weight_rp_steps,
                          params.weight_selenzyme,
                          params.weight_fba,
@@ -55,15 +75,21 @@ if __name__ == "__main__":
                          params.thermo_floor,
                          params.fba_ceil,
                          params.fba_floor,
-                         params.pathway_id)
-    else:
+                         params.pathway_id,
+                         params.objective_id,
+                         params.thermo_id)
+    elif params.input_format=='sbml':
         #make the tar.xz 
         with tempfile.TemporaryDirectory() as tmpOutputFolder:
-            inputTar = tmpOutputFolder+'/tmp_input.tar.xz'
-            with tarfile.open(inputTar, mode='w:xz') as tf:
-                tf.add(params.sbml)
-            rpToolServe.main(inputTar,
-                             params.outputTar,
+            input_tar = tmpOutputFolder+'/tmp_input.tar.xz'
+            output_tar = tmpOutputFolder+'/tmp_output.tar.xz'
+            with tarfile.open(input_tar, mode='w:xz') as tf:
+                #tf.add(params.input)
+                info = tarfile.TarInfo('single.rpsbml.xml') #need to change the name since galaxy creates .dat files
+                info.size = os.path.getsize(params.input)
+                tf.addfile(tarinfo=info, fileobj=open(params.input, 'rb')) 
+            rpToolServe.main(input_tar,
+                             output_tar,
                              params.weight_rp_steps,
                              params.weight_selenzyme,
                              params.weight_fba,
@@ -74,4 +100,14 @@ if __name__ == "__main__":
                              params.thermo_floor,
                              params.fba_ceil,
                              params.fba_floor,
-                             params.pathway_id)
+                             params.pathway_id,
+                             params.objective_id,
+                             params.thermo_id)
+            with tarfile.open(output_tar) as outTar:
+                outTar.extractall(tmpOutputFolder)
+            out_file = glob.glob(tmpOutputFolder+'/*.rpsbml.xml')
+            if len(out_file)>1:
+                logging.warning('There are more than one output file...')
+            shutil.copy(out_file[0], params.output)
+    else:
+        self.logging('Cannot identify the input_format: '+str(params.input_format))
