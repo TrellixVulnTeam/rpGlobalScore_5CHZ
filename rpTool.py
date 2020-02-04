@@ -94,11 +94,6 @@ def calculateGlobalScore(rpsbml,
         if objective.getId()==objective_id:
             obj_objective = objective
             break
-    print('############')
-    print([i.getId() for i in fbc.getListOfObjectives()])
-    print(fbc)
-    print(obj_objective)
-    print('############')
     if obj_objective:
         #for obj in fbc.getListOfObjectives():
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(obj_objective.getAnnotation())
@@ -149,7 +144,7 @@ def calculateGlobalScore(rpsbml,
     rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', norm_thermo)
     '''
     #if you want the mean of each reaction normalisation
-    norm_thermo = (all_norm_thermo/float(len(members)))/100.0
+    norm_thermo = all_norm_thermo/float(len(members))
     rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', norm_thermo)
     ############################
     ##### length of members ####
@@ -167,7 +162,7 @@ def calculateGlobalScore(rpsbml,
     ##############################
     #higher is better
     #NOTE: that missing selenzyme value will be considered 0.0 since we divide by the number of members
-    norm_selenzyme = (all_top_selenzyme/float(len(members)))/100.0
+    norm_selenzyme = all_top_selenzyme/float(len(members))
     rpsbml.addUpdateBRSynth(rp_pathway, 'norm_selenzyme', norm_selenzyme)
     ############################
     ##### global score #########
