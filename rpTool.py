@@ -44,7 +44,7 @@ def calculateGlobalScore(rpsbml,
         try:
             #sum of mean of top selenzyme score
             top_selenzyme = brsynth_dict['selenzyme'][sorted(brsynth_dict['selenzyme'], key=lambda kv: kv[1])[0]]
-            all_top_selenzyme += top_selenzyme
+            all_top_selenzyme += top_selenzyme/100.0
             rpsbml.addUpdateBRSynth(reaction, 'norm_selenzyme', top_selenzyme/100.0)
         except (IndexError, TypeError) as e:
             logging.warning('Missing selenzyme values for reaction: '+str(member.getIdRef()))
