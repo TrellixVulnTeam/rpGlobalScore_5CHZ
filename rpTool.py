@@ -24,7 +24,7 @@ def calculateGlobalScore(rpsbml,
                          fba_ceil=999999.0,
                          fba_floor=0.0,
                          pathway_id='rp_pathway',
-                         objective_id='obj_rpFBA_frac',
+                         objective_id='obj_RP1_sink__restricted_biomass',
                          thermo_id='dfG_prime_m'):
     groups = rpsbml.model.getPlugin('groups')
     fbc = rpsbml.model.getPlugin('fbc')
