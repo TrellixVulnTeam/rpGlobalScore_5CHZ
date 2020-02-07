@@ -36,6 +36,7 @@ def calculateGlobalScore(rpsbml,
     all_norm_thermo = 0.0
     #Loop through all the reactions
     for member in members:
+        print(member.getIdRef())
         reaction = rpsbml.model.getReaction(member.getIdRef())
         annot = reaction.getAnnotation()
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(annot)
@@ -80,6 +81,8 @@ def calculateGlobalScore(rpsbml,
             elif brsynth_dict[reac_objective_id]['value']>fba_ceil:
                 norm_fba = 1.0
             all_norm_fba += norm_fba
+            print('norm_'+reac_objective_id)
+            print(norm_fba)
             rpsbml.addUpdateBRSynth(reaction, 'norm_'+reac_objective_id, norm_fba)
         except (KeyError, TypeError) as e:
             logging.warning('Cannot find the objective: '+str(objective_id)+' for the reaction: '+str(member.getIdRef()))
@@ -98,16 +101,18 @@ def calculateGlobalScore(rpsbml,
         #for obj in fbc.getListOfObjectives():
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(obj_objective.getAnnotation())
         try:
+            print(brsynth_dict['flux_value']['value'])
             #min-max feature scaling for dfG_prime_m
-            if fba_ceil>=float(brsynth_dict['flux_value'])>=fba_floor:
-                norm_fba = (round(float(brsynth_dict['flux_value']), 4)-fba_floor)/(fba_ceil-fba_floor)
-            elif float(brsynth_dict['flux_value'])<fba_floor:
+            if fba_ceil>=float(brsynth_dict['flux_value']['value'])>=fba_floor:
+                norm_fba = (round(float(brsynth_dict['flux_value']['value']), 4)-fba_floor)/(fba_ceil-fba_floor)
+            elif float(brsynth_dict['flux_value']['value'])<fba_floor:
                 norm_fba = 0.0
-            elif float(brsynth_dict['flux_value'])>fba_ceil:
+            elif float(brsynth_dict['flux_value']['value'])>fba_ceil:
                 norm_fba = 1.0
         except (KeyError, TypeError) as e:
             logging.warning('Could not retreive flux value: '+str(objective_id))
             norm_fba = 0.0
+        print(norm_fba)
         rpsbml.addUpdateBRSynth(obj_objective, 'norm_flux_value', norm_fba)
         rpsbml.addUpdateBRSynth(rp_pathway, 'norm_'+obj_objective.getId(), norm_fba)
         #update the flux obj
@@ -121,6 +126,7 @@ def calculateGlobalScore(rpsbml,
     else:
         logging.warning('Could not find objective: '+str(objective_id))
         norm_fba = 0.0
+    print('##########################################')
     ##############################
     #### group thermo ############
     ##############################
