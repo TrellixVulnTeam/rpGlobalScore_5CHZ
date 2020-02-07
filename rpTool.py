@@ -97,7 +97,6 @@ def calculateGlobalScore(rpsbml,
     if obj_objective:
         #for obj in fbc.getListOfObjectives():
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(obj_objective.getAnnotation())
-        print(brsynth_dict)
         try:
             #min-max feature scaling for dfG_prime_m
             if fba_ceil>=float(brsynth_dict['flux_value'])>=fba_floor:
