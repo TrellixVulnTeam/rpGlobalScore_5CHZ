@@ -35,7 +35,7 @@ def runGlobalScore_mem(inputTar,
                        #weight_reactionRule,
                        max_rp_steps,
                        pathway_id,
-                       rpFBAObj_name):
+                       obj_name):
     #loop through all of them and run FBA on them
     with tarfile.open(outputTar, 'w:xz') as tf:
         with tarfile.open(inputTar, 'r:xz') as in_tf:
@@ -50,7 +50,7 @@ def runGlobalScore_mem(inputTar,
                                                        #weight_reactionRule,
                                                        max_rp_steps,
                                                        pathway_id,
-                                                       rpFBAObj_name)
+                                                       obj_name)
                     data = libsbml.writeSBMLToString(rpsbml.document).encode('utf-8')
                     fiOut = io.BytesIO(data)
                     info = tarfile.TarInfo(member.name)
@@ -68,20 +68,23 @@ def runGlobalScore_hdd(inputTar,
                        weight_selenzyme,
                        weight_fba,
                        weight_thermo,
-                       #weight_reactionRule,
                        max_rp_steps,
                        topX,
-                       pathway_id,
-                       rpFBAObj_name):
+                       thermo_ceil=8901.2,
+                       thermo_floor=-7570.2,
+                       fba_ceil=999999.0,
+                       fba_floor=0.0,
+                       pathway_id='rp_pathway',
+                       objective_id='obj_rpFBA_frac',
+                       thermo_id='dfG_prime_m'):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
-            #tar = tarfile.open(fileobj=inputTar, mode='r:xz')
             tar = tarfile.open(fileobj=inputTar, mode='r')
             tar.extractall(path=tmpInputFolder)
             tar.close()
             fileNames_score = {}
             for sbml_path in glob.glob(tmpInputFolder+'/*'):
-                fileName = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '')
+                fileName = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '').replace('.rpsbml', '')
                 rpsbml = rpSBML.rpSBML(fileName)
                 rpsbml.readSBML(sbml_path)
                 globalScore = calculateGlobalScore(rpsbml,
@@ -89,19 +92,23 @@ def runGlobalScore_hdd(inputTar,
                                                    weight_selenzyme,
                                                    weight_fba,
                                                    weight_thermo,
-                                                   #weight_reactionRule,
                                                    max_rp_steps,
+                                                   thermo_ceil,
+                                                   thermo_floor,
+                                                   fba_ceil,
+                                                   fba_floor,
                                                    pathway_id,
-                                                   rpFBAObj_name)
+                                                   objective_id,
+                                                   thermo_id)
                 fileNames_score[fileName] = globalScore
                 rpsbml.writeSBML(tmpOutputFolder)
             #sort the results
             top_fileNames = [k for k, v in sorted(fileNames_score.items(), key=lambda item: item[1])][:topX]
             with tarfile.open(fileobj=outputTar, mode='w:xz') as ot:
                 for sbml_path in glob.glob(tmpOutputFolder+'/*'):
-                    fileName = str(sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', ''))
+                    fileName = str(sbml_path.split('/')[-1].replace('.rpsbml', '').replace('.sbml', '').replace('.xml', ''))
                     if fileName in top_fileNames:
-                        fileName += '.sbml.xml'
+                        fileName += '.rpsbml.xml'
                         info = tarfile.TarInfo(fileName)
                         info.size = os.path.getsize(sbml_path)
                         ot.addfile(tarinfo=info, fileobj=open(sbml_path, 'rb'))
@@ -156,7 +163,7 @@ class RestQuery(Resource):
                            #float(params['weight_reactionRule']),
                            float(params['max_rp_steps']),
                            str(params['pathway_id']),
-                           str(params['rpFBAObj_name']))
+                           str(params['obj_name']))
         '''
         #### HDD ####
         #weight_rp_steps, weight_fba, weight_thermo, pathway_id
@@ -166,11 +173,15 @@ class RestQuery(Resource):
                            float(params['weight_selenzyme']),
                            float(params['weight_fba']),
                            float(params['weight_thermo']),
-                           #float(params['weight_reactionRule']),
                            float(params['max_rp_steps']),
                            int(params['topX']),
+                           float(params['thermo_ceil']),
+                           float(params['thermo_floor']),
+                           float(params['fba_ceil']),
+                           float(params['fba_floor']),
                            str(params['pathway_id']),
-                           str(params['rpFBAObj_name']))
+                           str(params['objective_id']),
+                           str(params['thermo_id']))
         ###### IMPORTANT ######
         outputTar.seek(0)
         #######################
