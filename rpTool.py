@@ -53,6 +53,7 @@ def calculateGlobalScore(rpsbml,
             rpsbml.addUpdateBRSynth(reaction, 'norm_selenzyme', top_selenzyme/100.0)
         except (IndexError, TypeError) as e:
             logging.warning('Missing selenzyme values for reaction: '+str(member.getIdRef()))
+            rpsbml.addUpdateBRSynth(reaction, 'norm_selenzyme', 0.0)
         ####### Thermo ############
         #lower is better
         #WARNING: we will only take the dfG_prime_m value
@@ -78,6 +79,7 @@ def calculateGlobalScore(rpsbml,
                     rpsbml.addUpdateBRSynth(reaction, 'norm_'+bd_id, norm_thermo)
                 except (KeyError, TypeError) as e:
                     logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(member.getIdRef()))
+                    rpsbml.addUpdateBRSynth(reaction, 'norm_'+bd_id, 0.0)
                     #norm_thermo = 1.0
         ####### FBA ##############
         #higher is better
@@ -100,6 +102,7 @@ def calculateGlobalScore(rpsbml,
                     rpsbml.addUpdateBRSynth(reaction, 'norm_'+bd_id, norm_fba)
                 except (KeyError, TypeError) as e:
                     logging.warning('Cannot find the objective: '+str(bd_id)+' for the reaction: '+str(member.getIdRef()))
+                    rpsbml.addUpdateBRSynth(reaction, 'norm_'+bd_id, 0.0)
     #print('########### reactions_data ###########')
     #print(reactions_data)
     ##############################
