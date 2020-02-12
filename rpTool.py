@@ -72,7 +72,7 @@ def calculateGlobalScore(rpsbml,
                     reactions_data['thermo']['reactions'][member.getIdRef()][bd_id] = norm_thermo
                     if bd_id==thermo_id:
                         reactions_data['thermo']['global'][bd_id] += norm_thermo
-                    rpsbml.addUpdateBRSynth(reaction, bd_id, norm_thermo)
+                    rpsbml.addUpdateBRSynth(reaction, 'norm_'+bd_id, norm_thermo)
                 except (KeyError, TypeError) as e:
                     logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(member.getIdRef()))
                     #norm_thermo = 1.0
