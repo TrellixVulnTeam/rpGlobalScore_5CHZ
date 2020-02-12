@@ -96,7 +96,6 @@ def calculateGlobalScore(rpsbml,
                     rpsbml.addUpdateBRSynth(reaction, 'norm_'+bd_id, norm_fba)
                 except (KeyError, TypeError) as e:
                     logging.warning('Cannot find the objective: '+str(bd_id)+' for the reaction: '+str(member.getIdRef()))
-    print(reactions_data)
     ##############################
     ##### target FBA value #######
     ##############################
