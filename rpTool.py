@@ -163,6 +163,7 @@ def calculateGlobalScore(rpsbml,
     norm_thermo = 1.0-norm_thermo
     rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', norm_thermo)
     '''
+    '''
     #if you want the mean of each reaction normalisation
     for t_id in reactions_data['thermo']['global']:
         try:
@@ -171,6 +172,16 @@ def calculateGlobalScore(rpsbml,
         except KeyError:
             reactions_data['thermo']['global'][t_id] = 0.0
             rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', reactions_data['thermo']['global'][t_id])
+    '''
+    brsynth_dict = rpsbml.readBRSYNTHAnnotation(rp_pathway.getAnnotation())
+    for bd_id in brsynth_dict:
+        if bd_id[:4]=='dfG_':
+            try:
+                reactions_data['thermo']['global'][bd_id] = reactions_data['thermo']['global'][bd_id]/float(len(members))
+                rpsbml.addUpdateBRSynth(rp_pathway, 'norm_'+bd_id, reactions_data['thermo']['global'][bd_id])
+            except (KeyError, TypeError) as e:
+                logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(member.getIdRef()))
+                rpsbml.addUpdateBRSynth(rp_pathway, 'norm_'+bd_id, 0.0)
     try:
         target_norm_thermo = reactions_data['thermo']['global'][thermo_id]
     except KeyError:
