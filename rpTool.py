@@ -113,6 +113,8 @@ def calculateGlobalScore(rpsbml,
     #find the objective
     for objective in fbc.getListOfObjectives():
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(objective.getAnnotation())
+        print('------- objective ---------> '+str(objective.getId()))
+        print(brsynth_dict)
         try:
             #min-max feature scaling for FBA
             if fba_ceil>=float(brsynth_dict['flux_value']['value'])>=fba_floor:
@@ -122,7 +124,8 @@ def calculateGlobalScore(rpsbml,
             elif float(brsynth_dict['flux_value']['value'])>fba_ceil:
                 norm_fba = 1.0
         except (KeyError, TypeError) as e:
-            logging.warning('Could not retreive flux value: '+str(objective_id))
+            logging.warning('Could not retreive flux value: '+str(objective.getId()))
+            continue
             target_norm_fba = 0.0
         rpsbml.addUpdateBRSynth(objective, 'norm_flux_value', norm_fba)
         rpsbml.addUpdateBRSynth(rp_pathway, 'norm_'+objective.getId(), norm_fba)
