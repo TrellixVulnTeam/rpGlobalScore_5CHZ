@@ -113,8 +113,8 @@ def calculateGlobalScore(rpsbml,
     #find the objective
     for objective in fbc.getListOfObjectives():
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(objective.getAnnotation())
-        print('------- objective ---------> '+str(objective.getId()))
-        print(brsynth_dict)
+        #print('------- objective ---------> '+str(objective.getId()))
+        #print(brsynth_dict)
         try:
             #min-max feature scaling for FBA
             if fba_ceil>=float(brsynth_dict['flux_value']['value'])>=fba_floor:
