@@ -59,7 +59,8 @@ def calculateGlobalScore(rpsbml,
         for bd_id in brsynth_dict:
             if bd_id[:4]=='dfG_':
                 reactions_data['thermo']['reactions'][member.getIdRef()][bd_id] = 0.0
-                reactions_data['thermo']['global'][bd_id] = 0.0
+                reactions_data['thermo']['global'][member.getIdRef()][bd_id] = 0.0
+                #reactions_data['thermo']['global'][bd_id] = 0.0
                 try:
                     if thermo_ceil>=brsynth_dict[bd_id]['value']>=thermo_floor:
                         #min-max feature scaling
@@ -70,8 +71,9 @@ def calculateGlobalScore(rpsbml,
                         norm_thermo = 1.0
                     norm_thermo = 1.0-norm_thermo
                     reactions_data['thermo']['reactions'][member.getIdRef()][bd_id] = norm_thermo
-                    if bd_id==thermo_id:
-                        reactions_data['thermo']['global'][bd_id] += norm_thermo
+                    reactions_data['thermo']['global'][member.getIdRef()][bd_id] += norm_thermo
+                    #if bd_id==thermo_id:
+                    #    reactions_data['thermo']['global'][bd_id] += norm_thermo
                     rpsbml.addUpdateBRSynth(reaction, 'norm_'+bd_id, norm_thermo)
                 except (KeyError, TypeError) as e:
                     logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(member.getIdRef()))
@@ -83,7 +85,7 @@ def calculateGlobalScore(rpsbml,
         for bd_id in brsynth_dict:
             if bd_id[:4]=='fba_':
                 reactions_data['fba']['reactions'][member.getIdRef()][bd_id] = 0.0
-                reactions_data['fba']['global'][bd_id] = 0.0
+                reactions_data['fba']['global'][member.getIdRef()][bd_id] = 0.0
                 try:
                     if fba_ceil>=brsynth_dict[bd_id]['value']>=fba_floor:
                         #min-max feature scaling
