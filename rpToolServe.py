@@ -72,10 +72,10 @@ def runGlobalScore_hdd(inputTar,
                        topX,
                        thermo_ceil=8901.2,
                        thermo_floor=-7570.2,
-                       fba_ceil=999999.0,
+                       fba_ceil=3.0,
                        fba_floor=0.0,
                        pathway_id='rp_pathway',
-                       objective_id='obj_rpFBA_frac',
+                       objective_id='obj_RP1_sink__restricted_biomass',
                        thermo_id='dfG_prime_m'):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
@@ -112,6 +112,7 @@ def runGlobalScore_hdd(inputTar,
                         info = tarfile.TarInfo(fileName)
                         info.size = os.path.getsize(sbml_path)
                         ot.addfile(tarinfo=info, fileobj=open(sbml_path, 'rb'))
+    return fileNames_score
 
 
 #######################################################

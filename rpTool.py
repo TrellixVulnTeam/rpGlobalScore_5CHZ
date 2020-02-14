@@ -194,7 +194,10 @@ def calculateGlobalScore(rpsbml,
         logging.warning('There are more steps than specified')
         norm_steps = 1.0
     else:
-        norm_steps = (float(len(members))-1.0)/(float(max_rp_steps)-1.0)
+        try:
+            norm_steps = (float(len(members))-1.0)/(float(max_rp_steps)-1.0)
+        except ZeroDivisionError:
+            norm_steps = 0.0
     norm_steps = 1.0-norm_steps
     rpsbml.addUpdateBRSynth(rp_pathway, 'norm_steps', norm_steps)
     ##############################
