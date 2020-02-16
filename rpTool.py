@@ -216,6 +216,7 @@ def calculateGlobalScore(rpsbml,
     ##### global score #########
     ############################
     #globalScore = (norm_selenzyme*weight_selenzyme+norm_steps*weight_rp_steps+norm_fba*weight_fba+norm_thermo*weight_thermo)/4.0
+    '''
     toDiv = 0.0
     if not weight_rp_steps==0.0:
         toDiv += 1.0
@@ -225,6 +226,8 @@ def calculateGlobalScore(rpsbml,
         toDiv += 1.0
     if not weight_thermo==0.0:
         toDiv += 1.0
+    '''
+    ##TODO: can check the thermo value and if + then linearly reduce its score
     #print('\t\t--------------------------- rpGlobalScore --------------------')
     #print('\t\tSelenzyme: '+str(reactions_data['selenzyme']['global'])+' * '+str(weight_selenzyme)+' = '+str(reactions_data['selenzyme']['global']*weight_selenzyme))
     #print('\t\tSteps: '+str(norm_steps)+' * '+str(weight_rp_steps)+' = '+str(norm_steps*weight_rp_steps))
@@ -234,7 +237,8 @@ def calculateGlobalScore(rpsbml,
                    norm_steps*weight_rp_steps+
                    target_norm_fba*weight_fba+
                    #target_norm_thermo*weight_thermo)/4.0
-                   target_norm_thermo*weight_thermo)/toDiv
+                   #target_norm_thermo*weight_thermo)/toDiv
+                   target_norm_thermo*weight_thermo)/sum([weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo])
     #print('\t\tGlobal: '+str(globalScore))
     rpsbml.addUpdateBRSynth(rp_pathway, 'global_score', globalScore)
     return globalScore
