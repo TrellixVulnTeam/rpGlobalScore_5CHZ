@@ -233,12 +233,15 @@ def calculateGlobalScore(rpsbml,
     #print('\t\tSteps: '+str(norm_steps)+' * '+str(weight_rp_steps)+' = '+str(norm_steps*weight_rp_steps))
     #print('\t\tFBA: '+str(target_norm_fba)+' * '+str(weight_fba)+' = '+str(target_norm_fba*weight_fba))
     #print('\t\tThermodynamics: '+str(target_norm_thermo)+' * '+str(weight_thermo)+' = '+str(target_norm_thermo*weight_thermo))
-    globalScore = (reactions_data['selenzyme']['global']*weight_selenzyme+
-                   norm_steps*weight_rp_steps+
-                   target_norm_fba*weight_fba+
-                   #target_norm_thermo*weight_thermo)/4.0
-                   #target_norm_thermo*weight_thermo)/toDiv
-                   target_norm_thermo*weight_thermo)/sum([weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo])
+    try:
+        globalScore = (reactions_data['selenzyme']['global']*weight_selenzyme+
+                       norm_steps*weight_rp_steps+
+                       target_norm_fba*weight_fba+
+                       #target_norm_thermo*weight_thermo)/4.0
+                       #target_norm_thermo*weight_thermo)/toDiv
+                       target_norm_thermo*weight_thermo)/sum([weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo])
+    except ZeroDivisionError:
+        globalScore = 0.0
     #print('\t\tGlobal: '+str(globalScore))
     rpsbml.addUpdateBRSynth(rp_pathway, 'global_score', globalScore)
     return globalScore
