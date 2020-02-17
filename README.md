@@ -1,44 +1,50 @@
-# REST rpGlobalScore
+# rpGlobalScore
 
-REST tool that reads a collection of rpSBML files (in a tar.xz) and calculates a global score based on a series of weights given by the user
+Calculate the global score based on the thermodynamics, FBA, Selenzyme analysis. For more information of the way the global score is calculated please refer to the following document TODO. The tool returns the top scoring pathways as set by the user. 
 
+## Information Flow
+
+### Input
+
+Required information:
+    * Single rpSBML or collection of SBML file as a tar.xz
+    * Maximal number of steps (as run in RetroPath2.0)
+    * Number of steps weight
+    * Selenzyme weight
+    * FBA weight
+    * Thermodynamics weight
+    * Number of best scoring pathways to return
+
+Advanced Options:
+    * Name of the heterologous pathway: (default: rp_pathway) Groups ID of the heterologous pathway
+    * Thermodynamics ID: (default: dfG_prime_m)
+    * Thermodynamics normalisation ceiling: (default: 8901.2)
+    * Thermodynamics normalisation floor: (default: -7570.2)
+    * FBA objective ID: (default: obj_RP1_sink__restricted_biomass)
+    * FBA normalisation ceiling: (default: 3.0)
+    * FBA normalisation floor: (default: 0.0)
+    * IP address of the rpGlobalScore REST service: IP address of the REST service
+
+### Output
+
+## Installing
+
+To compile the docker use the following command:
+
+```
+docker build -t brsynth/rpglobalscore-rest:dev -f Dockerfile .
+```
+
+And then run the container with the follwing command:
+
+```
+docker run -p 8881:8888 brsynth/rpglobalscore-rest:dev
+```
 
 ### Prerequisites
 
 * Docker - [Install](https://docs.docker.com/v17.09/engine/installation/)
 * libSBML - [Anaconda library](https://anaconda.org/SBMLTeam/python-libsbml)
-
-### Compiling and running
-
-```
-docker build -t brsynth/rpglobalscore-rest -f Dockerfile .
-```
-
-Run the service
-
-```
-docker run -p 8881:8888 brsynth/rpglobalscore-rest
-```
-
-## Running the tests
-
-TODO
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
-## Built With
-
-* [Galaxy](https://galaxyproject.org) - The Galaxy project
 
 ## Contributing
 
@@ -46,7 +52,7 @@ Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c6
 
 ## Versioning
 
-TODO
+Version 0.1
 
 ## Authors
 
