@@ -131,13 +131,13 @@ def matchScore(x):
                 m_s[i] = np.mean([match_scores[meas][i]['reac_score'], match_scores[meas][i]['ec_score']])
             #print('\tMeasured Match Scores: '+str(m_s))
             #print('\tPredicted Match Scores: '+str(top_fileNames))
-            '''
-            rbo_res = rbo.rbo_dict(top_fileNames, m_s, p=0.9)
+            rbo_res = rbo.rbo_dict(top_fileNames, m_s, p=0.75)
             all_rbo.append(rbo_res.ext)
             '''
             all_rbo.append(rbo.RankingSimilarity(
                 sorted(top_fileNames, key=top_fileNames.__getitem__), 
                 sorted(m_s, key=m_s.__getitem__)).rbo())
+            '''
             #print('\tRBO: '+str(rbo_res))
             #print('\t min: '+str(rbo_res.min)+' -- res: '+str(rbo_res.res)+' -- ext: '+str(rbo_res.ext))
             #print('############ '+str(meas)+' ###########')
@@ -146,6 +146,8 @@ def matchScore(x):
             #print(rbo_res.ext) #this is the result
     print(x)
     all_opti_res['all_runs'][1.0-np.mean(all_rbo)] = list(x)
+    print(all_rbo)
+    all_rbo = [1.0 if i>1.0 else i for i in all_rbo]
     print(all_rbo)
     print('---> '+str(1.0-np.mean(all_rbo)))
     return 1.0-np.mean(all_rbo)
