@@ -43,6 +43,16 @@ And then run the container with the follwing command:
 docker run -p 8881:8888 brsynth/rpglobalscore-rest:dev
 ```
 
+## Algorithm
+
+### Normalisation
+
+The following parameters are normalised using min-max feature scaling
+
+#### Thermodynamics
+
+
+
 ## Prerequisites
 
 * Docker - [Install](https://docs.docker.com/v17.09/engine/installation/)
