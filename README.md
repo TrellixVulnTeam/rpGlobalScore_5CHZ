@@ -45,7 +45,7 @@ docker run -p 8881:8888 brsynth/rpglobalscore-rest:dev
 
 ## Algorithm
 
-The following features are normalised: Length of the pathway, Gibbs free energy of the 
+The following features are normalised: Length of the pathway, Gibbs free energy, FBA of the target (with fixed fraction of biomass) and Selenzyme scores.
 
 ### Min-Max Feature Scaling
 
@@ -62,7 +62,7 @@ The following features are normalised: Length of the pathway, Gibbs free energy 
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+TODO
 
 ## Versioning
 
