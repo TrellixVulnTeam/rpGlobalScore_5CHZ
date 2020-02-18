@@ -49,11 +49,11 @@ The following features are normalised: Length of the pathway, Gibbs free energy,
 
 ### Min-Max Feature Scaling
 
-![img](http://latex.codecogs.com/svg.latex?x%27+%3D+%5Cfrac%7Bx+-+%5Clfloor+x%5Crfloor%7D%7B%5Clceil+x%5Crceil-%5Clfloor+x%5Crfloor%7D)
+![img](http://latex.codecogs.com/svg.latex?x%27%3D%5Cfrac%7Bx-%5Clfloor%08x%5Crfloor%7D%7B%5Clceil%08x%5Crceil-%5Clfloor%08x%5Crfloor%7D)
 
 ### Global Score
 
-![img](http://latex.codecogs.com/svg.latex?%5Cbar%7Bx%7D+%3D+%5Cfrac%7B%5Csum_%7Bi%3D1%7D%5En%7Bw_ix_i%7D%7D%7B%5Csum_%7Bi%3D1%7D%5En%7Bw_i%7D%7D)
+![img](http://latex.codecogs.com/svg.latex?%5Cbar%7Bx%7D%3D%5Cfrac%7B%5Csum_%7Bi%3D1%7D%5En%7Bw_ix_i%7D%7D%7B%5Csum_%7Bi%3D1%7D%5En%7Bw_i%7D%7D)
 
 ## Prerequisites
 
