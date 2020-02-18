@@ -45,13 +45,15 @@ docker run -p 8881:8888 brsynth/rpglobalscore-rest:dev
 
 ## Algorithm
 
-### Normalisation
+The following features are normalised: Length of the pathway, Gibbs free energy of the 
 
-The following parameters are normalised using min-max feature scaling
+### Min-Max Feature Scaling
 
-#### Thermodynamics
+![img](http://latex.codecogs.com/svg.latex?x%27+%3D+%5Cfrac%7Bx+-+%5Clfloor+x%5Crfloor%7D%7B%5Clceil+x%5Crceil-%5Clfloor+x%5Crfloor%7D)
 
+### Global Score
 
+![img](http://latex.codecogs.com/svg.latex?%5Cbar%7Bx%7D+%3D+%5Cfrac%7B%5Csum_%7Bi%3D1%7D%5En%7Bw_ix_i%7D%7D%7B%5Csum_%7Bi%3D1%7D%5En%7Bw_i%7D%7D)
 
 ## Prerequisites
 
