@@ -19,8 +19,7 @@ import tempfile
 
 sys.path.insert(0, '/home/')
 import rpSBML
-from rpTool import calculateGlobalScore
-
+import rpTool
 
 '''
 ##
@@ -87,7 +86,7 @@ def runGlobalScore_hdd(inputTar,
                 fileName = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '').replace('.rpsbml', '')
                 rpsbml = rpSBML.rpSBML(fileName)
                 rpsbml.readSBML(sbml_path)
-                globalScore = calculateGlobalScore(rpsbml,
+                globalScore = rpTool.calculateGlobalScore(rpsbml,
                                                    weight_rp_steps,
                                                    weight_selenzyme,
                                                    weight_fba,
@@ -114,6 +113,43 @@ def runGlobalScore_hdd(inputTar,
                         ot.addfile(tarinfo=info, fileobj=open(sbml_path, 'rb'))
     return fileNames_score
 
+
+## RetroPath2.0 reader for local packages
+#
+#
+def runGlobalScore_json(rpsbml_json,
+                       weight_rp_steps,
+                       weight_selenzyme,
+                       weight_fba,
+                       weight_thermo,
+                       weight_thermo_var,
+                       max_rp_steps,
+                       topX,
+                       thermo_ceil=8901.2,
+                       thermo_floor=-7570.2,
+                       fba_ceil=5.0,
+                       fba_floor=0.0,
+                       pathway_id='rp_pathway',
+                       objective_id='obj_RP1_sink__restricted_biomass',
+                       thermo_id='dfG_prime_m'):
+    fileNames_score = {}
+    for rpsbml_id in rpsbml_json:
+        globalScore = rpTool.calculateGlobalScore_json(rpsbml_json[rpsbml_id],
+                                           weight_rp_steps,
+                                           weight_selenzyme,
+                                           weight_fba,
+                                           weight_thermo,
+                                           weight_thermo_var,
+                                           max_rp_steps,
+                                           thermo_ceil,
+                                           thermo_floor,
+                                           fba_ceil,
+                                           fba_floor,
+                                           pathway_id,
+                                           objective_id,
+                                           thermo_id)
+        fileNames_score[rpsbml_id] = globalScore
+    return fileNames_score
 
 #######################################################
 ############## REST ###################################

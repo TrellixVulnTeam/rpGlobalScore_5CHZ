@@ -114,13 +114,13 @@ all_opti_res = {'all_runs': {}}
 
 #sobol = sobol_seq.i4_sobol_generate(4, 100)
 all_sobol = {}
-sobol = sobol_seq.i4_sobol_generate(3, 300)
+sobol = sobol_seq.i4_sobol_generate(3, 500)
 best_weights = []
 best_score = 1.0
 for i in sobol:
     #weights = [(y/sum(i))*3.0 for y in i]
     #weights = [y for y in i]
-    weights = i
+    weights = list(i)
     score = matchScore(weights)
     all_sobol[score] = weights
     if score<best_score:
