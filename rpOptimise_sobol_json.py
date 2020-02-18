@@ -121,7 +121,6 @@ def matchScore(x):
                                                           x[0],
                                                           x[1],
                                                           x[2],
-                                                          x[3],
                                                           len_meas_steps[meas],
                                                           10) #this is the topx to return, don't care about it here
             #compile the mean score for the detected pathways
@@ -163,7 +162,7 @@ all_opti_res = {'all_runs': {}}
 
 #sobol = sobol_seq.i4_sobol_generate(4, 100)
 all_sobol = {}
-sobol = sobol_seq.i4_sobol_generate(4, 5000)
+sobol = sobol_seq.i4_sobol_generate(3, 5000)
 best_weights = []
 best_score = 1.0
 for i in sobol:

@@ -270,7 +270,7 @@ def calculateGlobalScore_json(rpsbml_json,
                              weight_selenzyme,
                              weight_fba,
                              weight_thermo,
-                             weight_thermo_var,
+                             #weight_thermo_var,
                              max_rp_steps, #fix this to 15 or something
                              thermo_ceil=8901.2,
                              thermo_floor=-7570.2,
@@ -471,9 +471,10 @@ def calculateGlobalScore_json(rpsbml_json,
                        #target_norm_thermo*weight_thermo)/4.0
                        #target_norm_thermo*weight_thermo)/toDiv
                        #target_norm_thermo*weight_thermo
-                       target_norm_thermo_mean*weight_thermo+
-                       target_norm_thermo_var*weight_thermo_var
-                       )/sum([weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo, weight_thermo_var])
+                       #target_norm_thermo_mean*weight_thermo+
+                       #target_norm_thermo_var*weight_thermo_var
+                       np.mean([target_norm_thermo_mean, target_norm_thermo_var])*weight_thermo
+                       )/sum([weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo])
     except ZeroDivisionError:
         globalScore = 0.0
     return globalScore
