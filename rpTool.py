@@ -473,7 +473,7 @@ def calculateGlobalScore_json(rpsbml_json,
                        #target_norm_thermo*weight_thermo
                        #target_norm_thermo_mean*weight_thermo+
                        #target_norm_thermo_var*weight_thermo_var
-                       np.mean([target_norm_thermo_mean, target_norm_thermo_var])*weight_thermo
+                       (target_norm_thermo_mean*target_norm_thermo_var)*weight_thermo
                        )/sum([weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo])
     except ZeroDivisionError:
         globalScore = 0.0
