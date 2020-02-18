@@ -131,7 +131,7 @@ def matchScore(x):
                 m_s[i] = np.mean([match_scores[meas][i]['reac_score'], match_scores[meas][i]['ec_score']])
             #print('\tMeasured Match Scores: '+str(m_s))
             #print('\tPredicted Match Scores: '+str(top_fileNames))
-            rbo_res = rbo.rbo_dict(top_fileNames, m_s, p=0.75)
+            rbo_res = rbo.rbo_dict(top_fileNames, m_s, p=0.85)
             all_rbo.append(rbo_res.ext)
             '''
             all_rbo.append(rbo.RankingSimilarity(
