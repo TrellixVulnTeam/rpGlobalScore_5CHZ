@@ -27,6 +27,8 @@ Advanced Options:
 
 ### Output
 
+* **rpGlobalScore**: Single or collection of rpSBML
+
 ## Installing
 
 To compile the docker use the following command:
