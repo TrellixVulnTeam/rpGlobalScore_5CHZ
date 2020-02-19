@@ -7,13 +7,8 @@ Calculate the global score based on the thermodynamics, FBA, Selenzyme analysis.
 ### Input
 
 Required information:
-* Single rpSBML or collection of SBML file as a tar.xz
-* Maximal number of steps (as run in RetroPath2.0)
-* Number of steps weight
-* Selenzyme weight
-* FBA weight
-* Thermodynamics weight
-* Number of best scoring pathways to return
+* **Input rpSBML**: Single rpSBML or collection of SBML file as a tar.xz
+* **Number of best scoring pathways to return**
 
 Advanced Options:
 * **Name of the heterologous pathway**: (default: rp_pathway) Groups ID of the heterologous pathway
@@ -24,6 +19,11 @@ Advanced Options:
 * **FBA normalisation ceiling**: (default: 3.0)
 * **FBA normalisation floor**: (default: 0.0)
 * **IP address of the rpGlobalScore REST service**: IP address of the REST service
+* **Maximal number of steps (as run in RetroPath2.0)**
+* **Number of steps weight**
+* **Selenzyme weight**
+* **FBA weight**
+* **Thermodynamics weight**
 
 ### Output
 

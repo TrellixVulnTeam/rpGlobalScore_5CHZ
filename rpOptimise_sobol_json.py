@@ -14,6 +14,8 @@ import tempfile
 import shutil
 import sobol_seq
 import json
+import string
+import scipy
 
 import sys
 
@@ -28,6 +30,10 @@ from scipy.optimize import minimize
 
 import rbo
 import logging
+
+from rpy2.robjects.packages import importr
+import rpy2.robjects as ro
+
 logger = logging.getLogger()
 logger.setLevel(logging.CRITICAL)
 
@@ -87,6 +93,7 @@ def rpExtractJSONfromSBML(inputTar, pathway_id='rp_pathway'):
     return json_out
 
 
+
 def matchScore(x):
     all_rbo = []
     print('############################')
@@ -131,13 +138,22 @@ def matchScore(x):
                 m_s[i] = np.mean([match_scores[meas][i]['reac_score'], match_scores[meas][i]['ec_score']])
             #print('\tMeasured Match Scores: '+str(m_s))
             #print('\tPredicted Match Scores: '+str(top_fileNames))
-            rbo_res = rbo.rbo_dict(top_fileNames, m_s, p=0.85)
-            all_rbo.append(rbo_res.ext)
             '''
-            all_rbo.append(rbo.RankingSimilarity(
-                sorted(top_fileNames, key=top_fileNames.__getitem__), 
-                sorted(m_s, key=m_s.__getitem__)).rbo())
+            #rbo_res = rbo.rbo_dict(top_fileNames, m_s, p=0.85)
+            #all_rbo.append(rbo_res.ext)
             '''
+            '''
+            #all_rbo.append(rbo.RankingSimilarity(
+            #    sorted(top_fileNames, key=top_fileNames.__getitem__), 
+            #    sorted(m_s, key=m_s.__getitem__)).rbo())
+            '''
+            #print('-------------------------------------')
+            #print('\t'+str(sorted(top_fileNames, key=top_fileNames.__getitem__)))
+            #print('\t'+str(sorted(m_s, key=m_s.__getitem__)))
+            rbo_pa = rbo.RankingSimilarity(sorted(top_fileNames, key=top_fileNames.__getitem__, reverse=True),
+                                           sorted(m_s, key=m_s.__getitem__, reverse=True))
+            rbo_pa.p = 0.9
+            all_rbo.append(rbo_pa.rbo_ext())
             #print('\tRBO: '+str(rbo_res))
             #print('\t min: '+str(rbo_res.min)+' -- res: '+str(rbo_res.res)+' -- ext: '+str(rbo_res.ext))
             #print('############ '+str(meas)+' ###########')
@@ -147,14 +163,15 @@ def matchScore(x):
     print(x)
     all_opti_res['all_runs'][1.0-np.mean(all_rbo)] = list(x)
     print(all_rbo)
-    all_rbo = [1.0 if i>1.0 else i for i in all_rbo]
-    print(all_rbo)
+    #all_rbo = [1.0 if i>1.0 else i for i in all_rbo]
+    #print(all_rbo)
     print('---> '+str(1.0-np.mean(all_rbo)))
     return 1.0-np.mean(all_rbo)
 
 
 ########
 
+'''
 print('################################################')
 print('################### SOBOL ######################')
 print('################################################')
@@ -176,22 +193,37 @@ for i in sobol:
     if score<best_score:
         best_score = score
         best_weights = weights
-    print('-------- BEST ----------')
-    print(best_weights)
-    print('---> '+str(best_score))
+    #print('-------- BEST ----------')
+    #print(best_weights)
+    #print('---> '+str(best_score))
 
 all_opti_res['sobol'] = all_sobol
 
+'''
 '''
 print('################################################')
 print('#################### MINIMISE ##################')
 print('################################################')
 
-x0 = np.array(best_weights)
-res = minimize(matchScore, x0, method='nelder-mead', options={'xatol': 1e-8, 'disp': True})
+global all_opti_res
+all_opti_res = {'all_runs': {}}
+
+x0 = np.array([0.3693771330715033, 0.06871795498987514, 0.1170221987509918])
+res = minimize(matchScore, x0, method='nelder-mead', options={'xatol': 1e-12, 'disp': True})
 
 #all_opti_res['nelder-mead'] = 
 '''
 
-with open('results_sobol.json', 'w') as fp:
+print('######################################################')
+print('#################### BASINHOPPING ####################')
+print('######################################################')
+
+global all_opti_res
+all_opti_res = {'all_runs': {}}
+
+#x0 = np.array([0.3693771330715033, 0.06871795498987514, 0.1170221987509918])
+x0 = np.array([0.1469727, 0.699707, 0.8334961])
+scipy.optimize.basinhopping(matchScore, x0, niter=100, T=1.0, stepsize=0.1)
+
+with open('results_basinhopping_2.json', 'w') as fp:
     json.dump(all_opti_res, fp)

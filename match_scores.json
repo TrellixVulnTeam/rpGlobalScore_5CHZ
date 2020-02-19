@@ -1,1 +1,230 @@
-{"measured_64": {"rp_9_2": {"reac_score": 0.05, "ec_score": 0.75}, "rp_9_1": {"reac_score": 0.05, "ec_score": 0.75}}, "measured_53": {"rp_3_1": {"reac_score": 0.9, "ec_score": 1.0}}, "measured_52": {"rp_1_2": {"reac_score": 0.2, "ec_score": 1.0}, "rp_1_1": {"reac_score": 0.2, "ec_score": 1.0}}, "measured_33": {"rp_2_15": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_24": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_4": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_3": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_8": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_19": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_13": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_21": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_5": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_25": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_12": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_6": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_7": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_14": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_2": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_10": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_9": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_22": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_18": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_23": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_17": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_16": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_20": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_1": {"reac_score": 0.1, "ec_score": 0.0}, "rp_2_11": {"reac_score": 0.1, "ec_score": 0.0}}, "measured_41": {"rp_1_2": {"reac_score": 0.2, "ec_score": 1.0}, "rp_1_1": {"reac_score": 0.2, "ec_score": 1.0}}, "measured_30": {"rp_3_1": {"reac_score": 0.1, "ec_score": 0.25}}, "measured_63": {"rp_2_1": {"reac_score": 0.06666666666666667, "ec_score": 1.0}}, "measured_61": {"rp_86_1": {"reac_score": 0.04, "ec_score": 0.5}, "rp_86_3": {"reac_score": 0.04, "ec_score": 0.5}, "rp_87_1": {"reac_score": 0.04, "ec_score": 0.5}, "rp_88_2": {"reac_score": 0.04, "ec_score": 0.5}, "rp_86_2": {"reac_score": 0.04, "ec_score": 0.5}, "rp_85_1": {"reac_score": 0.04, "ec_score": 0.5}, "rp_88_3": {"reac_score": 0.04, "ec_score": 0.5}, "rp_88_1": {"reac_score": 0.04, "ec_score": 0.5}}, "measured_75": {"rp_1_2": {"reac_score": 0.26666666666666666, "ec_score": 0.8333333333333334}, "rp_1_1": {"reac_score": 0.39999999999999997, "ec_score": 0.8333333333333334}}, "measured_71": {"rp_3_1": {"reac_score": 0.0, "ec_score": 1.0}}, "measured_25": {"rp_5_1": {"reac_score": 0.06666666666666667, "ec_score": 0.16666666666666666}}, "measured_59": {"rp_2_1": {"reac_score": 0.6, "ec_score": 0.5}}, "measured_29": {"rp_3_1": {"reac_score": 0.0, "ec_score": 1.0}}, "measured_72": {"rp_2_1": {"reac_score": 0.06666666666666667, "ec_score": 1.0}, "rp_1_1": {"reac_score": 0.06666666666666667, "ec_score": 0.8333333333333334}}}
+{
+    "measured_64": {
+        "rp_9_2": {
+            "reac_score": 0.05,
+            "ec_score": 0.75
+        },
+        "rp_9_1": {
+            "reac_score": 0.05,
+            "ec_score": 0.75
+        }
+    },
+    "measured_53": {
+        "rp_3_1": {
+            "reac_score": 0.9,
+            "ec_score": 1.0
+        }
+    },
+    "measured_52": {
+        "rp_1_2": {
+            "reac_score": 0.2,
+            "ec_score": 1.0
+        },
+        "rp_1_1": {
+            "reac_score": 0.2,
+            "ec_score": 1.0
+        }
+    },
+    "measured_33": {
+        "rp_2_15": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_24": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_4": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_3": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_8": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_19": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_13": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_21": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_5": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_25": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_12": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_6": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_7": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_14": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_2": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_10": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_9": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_22": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_18": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_23": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_17": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_16": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_20": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_1": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        },
+        "rp_2_11": {
+            "reac_score": 0.1,
+            "ec_score": 0.0
+        }
+    },
+    "measured_41": {
+        "rp_1_2": {
+            "reac_score": 0.2,
+            "ec_score": 1.0
+        },
+        "rp_1_1": {
+            "reac_score": 0.2,
+            "ec_score": 1.0
+        }
+    },
+    "measured_30": {
+        "rp_3_1": {
+            "reac_score": 0.1,
+            "ec_score": 0.25
+        }
+    },
+    "measured_63": {
+        "rp_2_1": {
+            "reac_score": 0.06666666666666667,
+            "ec_score": 1.0
+        }
+    },
+    "measured_61": {
+        "rp_86_1": {
+            "reac_score": 0.04,
+            "ec_score": 0.5
+        },
+        "rp_86_3": {
+            "reac_score": 0.04,
+            "ec_score": 0.5
+        },
+        "rp_87_1": {
+            "reac_score": 0.04,
+            "ec_score": 0.5
+        },
+        "rp_88_2": {
+            "reac_score": 0.04,
+            "ec_score": 0.5
+        },
+        "rp_86_2": {
+            "reac_score": 0.04,
+            "ec_score": 0.5
+        },
+        "rp_85_1": {
+            "reac_score": 0.04,
+            "ec_score": 0.5
+        },
+        "rp_88_3": {
+            "reac_score": 0.04,
+            "ec_score": 0.5
+        },
+        "rp_88_1": {
+            "reac_score": 0.04,
+            "ec_score": 0.5
+        }
+    },
+    "measured_75": {
+        "rp_1_2": {
+            "reac_score": 0.26666666666666666,
+            "ec_score": 0.8333333333333334
+        },
+        "rp_1_1": {
+            "reac_score": 0.39999999999999997,
+            "ec_score": 0.8333333333333334
+        }
+    },
+    "measured_71": {
+        "rp_3_1": {
+            "reac_score": 0.0,
+            "ec_score": 1.0
+        }
+    },
+    "measured_25": {
+        "rp_5_1": {
+            "reac_score": 0.06666666666666667,
+            "ec_score": 0.16666666666666666
+        }
+    },
+    "measured_59": {
+        "rp_2_1": {
+            "reac_score": 0.6,
+            "ec_score": 0.5
+        }
+    },
+    "measured_29": {
+        "rp_3_1": {
+            "reac_score": 0.0,
+            "ec_score": 1.0
+        }
+    },
+    "measured_72": {
+        "rp_2_1": {
+            "reac_score": 0.06666666666666667,
+            "ec_score": 1.0
+        },
+        "rp_1_1": {
+            "reac_score": 0.06666666666666667,
+            "ec_score": 0.8333333333333334
+        }
+    }
+}
