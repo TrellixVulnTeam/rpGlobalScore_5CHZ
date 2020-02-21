@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-import sys #exit using sys exit if any error is encountered
-sys.path.insert(0, '/home/')
-
 import libsbml
 import argparse
 import os
@@ -13,7 +10,7 @@ import tempfile
 import shutil
 
 import rpSBML
-from rpTool import calculateGlobalScore
+import rpTool
 
 
 '''
@@ -48,8 +45,8 @@ def runGlobalScore_mem(inputTar_bytes,
 ## run using HDD 3X less than the above function
 #
 #
-def runGlobalScore_hdd(inputTar_bytes,
-                       outputTar_bytes,
+def runGlobalScore_hdd(inputTar,
+                       outputTar,
                        weight_rp_steps,
                        weight_selenzyme,
                        weight_fba,
@@ -58,14 +55,14 @@ def runGlobalScore_hdd(inputTar_bytes,
                        topX,
                        thermo_ceil=8901.2,
                        thermo_floor=-7570.2,
-                       fba_ceil=999999.0,
+                       fba_ceil=5.0,
                        fba_floor=0.0,
                        pathway_id='rp_pathway',
-                       objective_id='obj_rpFBA_frac',
+                       objective_id='obj_RP1_sink__restricted_biomass',
                        thermo_id='dfG_prime_m'):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
-            tar = tarfile.open(fileobj=inputTar_bytes, mode='r')
+            tar = tarfile.open(fileobj=inputTar, mode='r')
             tar.extractall(path=tmpInputFolder)
             tar.close()
             fileNames_score = {}
@@ -73,7 +70,7 @@ def runGlobalScore_hdd(inputTar_bytes,
                 fileName = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '').replace('.rpsbml', '')
                 rpsbml = rpSBML.rpSBML(fileName)
                 rpsbml.readSBML(sbml_path)
-                globalScore = calculateGlobalScore(rpsbml,
+                globalScore = rpTool.calculateGlobalScore(rpsbml,
                                                    weight_rp_steps,
                                                    weight_selenzyme,
                                                    weight_fba,
@@ -84,13 +81,13 @@ def runGlobalScore_hdd(inputTar_bytes,
                                                    fba_ceil,
                                                    fba_floor,
                                                    pathway_id,
-						   objective_id,
-						   thermo_id)
+                                                   objective_id,
+                                                   thermo_id)
                 fileNames_score[fileName] = globalScore
                 rpsbml.writeSBML(tmpOutputFolder)
             #sort the results
             top_fileNames = [k for k, v in sorted(fileNames_score.items(), key=lambda item: item[1])][:topX]
-            with tarfile.open(fileobj=outputTar_bytes, mode='w:xz') as ot:
+            with tarfile.open(fileobj=outputTar, mode='w:xz') as ot:
                 for sbml_path in glob.glob(tmpOutputFolder+'/*'):
                     fileName = str(sbml_path.split('/')[-1].replace('.rpsbml', '').replace('.sbml', '').replace('.xml', ''))
                     if fileName in top_fileNames:
