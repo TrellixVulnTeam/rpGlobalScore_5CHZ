@@ -113,7 +113,6 @@ def runGlobalScore_hdd(inputTar,
                         ot.addfile(tarinfo=info, fileobj=open(sbml_path, 'rb'))
     return fileNames_score
 
-
 ## RetroPath2.0 reader for local packages
 #
 #
