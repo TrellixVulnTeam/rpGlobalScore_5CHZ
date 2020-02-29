@@ -69,7 +69,11 @@ def runGlobalScore_hdd(inputTar,
             for sbml_path in glob.glob(tmpInputFolder+'/*'):
                 fileName = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '').replace('.rpsbml', '')
                 rpsbml = rpSBML.rpSBML(fileName)
-                rpsbml.readSBML(sbml_path)
+                try:
+                    rpsbml.readSBML(sbml_path)
+                except FileNotFoundError:
+                    logging.warning('Error reading file '+str(fileName))
+                    continue
                 globalScore = rpTool.calculateGlobalScore(rpsbml,
                                                    weight_rp_steps,
                                                    weight_selenzyme,
@@ -101,12 +105,12 @@ def runGlobalScore_hdd(inputTar,
 #
 def main(inputTar,
          outputTar,
-         weight_rp_steps,
-         weight_selenzyme,
-         weight_fba,
-         weight_thermo,
-         max_rp_steps,
          topX,
+         weight_rp_steps=0.0,
+         weight_selenzyme=0.1469727,
+         weight_fba=0.699707,
+         weight_thermo=0.8334961,
+         max_rp_steps=15,
          thermo_ceil=8901.2,
          thermo_floor=-7570.2,
          fba_ceil=999999.0,
