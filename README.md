@@ -11,7 +11,7 @@ REST tool that reads a collection of rpSBML files (in a tar.xz) and calculates a
 ### Compiling and running
 
 ```
-docker build -t brsynth/rpglobalscore-standalone -f Dockerfile .
+docker build -t brsynth/rpglobalscore-standalone:dev -f Dockerfile .
 ```
 
 ## Running the tests

@@ -8,6 +8,7 @@ import tarfile
 import glob
 import tempfile
 import shutil
+import logging
 
 import rpSBML
 import rpTool
