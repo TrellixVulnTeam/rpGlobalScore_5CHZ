@@ -178,20 +178,13 @@ def calculateGlobalScore(rpsbml,
                        target_norm_fba*weight_fba+
                        norm_rScore*weight_rule_score+
                        target_norm_thermo_mean*weight_thermo+
-                       target_norm_thermo_var*weight_thermo_var+
+                       target_norm_thermo_var*weight_thermo_var
                        )/sum([weight_rp_steps, weight_fba, weight_thermo, weight_thermo_var, weight_rule_score])
     except ZeroDivisionError:
         logging.warning('Global score calculation is dividing everything by 0')
         globalScore = 0.0
     rpsbml.addUpdateBRSynth(rp_pathway, 'global_score', globalScore)
     return globalScore
-
-
-
-
-
-
-
 
 
 
@@ -334,7 +327,7 @@ def calculateGlobalScore_json(rpsbml_json,
                        target_norm_fba*weight_fba+
                        norm_rScore*weight_rule_score+
                        target_norm_thermo_mean*weight_thermo+
-                       target_norm_thermo_var*weight_thermo_var+
+                       target_norm_thermo_var*weight_thermo_var
                        )/sum([weight_rp_steps, weight_fba, weight_thermo, weight_thermo_var, weight_rule_score])
     except ZeroDivisionError:
         logging.warning('Global score calculation is dividing everything by 0')
