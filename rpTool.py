@@ -319,7 +319,7 @@ def calculateGlobalScore_json(rpsbml_json,
         globalScore = (norm_steps*weight_rp_steps+
                        target_norm_fba*weight_fba+
                        norm_rScore*weight_rule_score+
-                       target_norm_thermo_mean*weight_thermo+
+                       target_norm_thermo_mean*weight_thermo
                        )/sum([weight_rp_steps, weight_fba, weight_thermo, weight_rule_score])
     except ZeroDivisionError:
         logging.warning('Global score calculation is dividing everything by 0')
