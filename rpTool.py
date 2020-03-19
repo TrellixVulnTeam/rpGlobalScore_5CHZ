@@ -144,10 +144,8 @@ def calculateGlobalScore(rpsbml,
                 logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(bd_id))
     try:
         target_norm_thermo_mean = np.mean([reactions_data['thermo']['reactions'][i][thermo_id] for i in reactions_data['thermo']['reactions']])
-        #target_norm_thermo_var = 1.0-stats.variation([reactions_data['thermo']['reactions'][i][thermo_id] for i in reactions_data['thermo']['reactions']])
     except KeyError:
         target_norm_thermo_mean = 0.0
-        #target_norm_thermo_var = 0.0
     ############################
     ##### length of members ####
     ############################
@@ -177,8 +175,6 @@ def calculateGlobalScore(rpsbml,
                        target_norm_fba*weight_fba+
                        norm_rScore*weight_rule_score+
                        target_norm_thermo_mean*weight_thermo
-                       #target_norm_thermo_var*weight_thermo_var
-                       #)/sum([weight_rp_steps, weight_fba, weight_thermo, weight_thermo_var, weight_rule_score])
                        )/sum([weight_rp_steps, weight_fba, weight_thermo, weight_rule_score])
     except ZeroDivisionError:
         logging.warning('Global score calculation is dividing everything by 0')
@@ -294,10 +290,8 @@ def calculateGlobalScore_json(rpsbml_json,
                 logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(bd_id))
     try:
         target_norm_thermo_mean = np.mean([reactions_data['thermo']['reactions'][i][thermo_id] for i in reactions_data['thermo']['reactions']])
-        #target_norm_thermo_var = 1.0-stats.variation([reactions_data['thermo']['reactions'][i][thermo_id] for i in reactions_data['thermo']['reactions']])
     except KeyError:
         target_norm_thermo_mean = 0.0
-        #target_norm_thermo_var = 0.0
     ############################
     ##### length of members ####
     ############################
@@ -326,8 +320,6 @@ def calculateGlobalScore_json(rpsbml_json,
                        target_norm_fba*weight_fba+
                        norm_rScore*weight_rule_score+
                        target_norm_thermo_mean*weight_thermo+
-                       #target_norm_thermo_var*weight_thermo_var
-                       #)/sum([weight_rp_steps, weight_fba, weight_thermo, weight_thermo_var, weight_rule_score])
                        )/sum([weight_rp_steps, weight_fba, weight_thermo, weight_rule_score])
     except ZeroDivisionError:
         logging.warning('Global score calculation is dividing everything by 0')
