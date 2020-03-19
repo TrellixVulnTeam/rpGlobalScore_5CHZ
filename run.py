@@ -23,7 +23,6 @@ def main(inputfile,
          weight_rule_score,
          weight_fba,
          weight_thermo,
-         weight_thermo_var,
          weight_rp_steps,
          max_rp_steps,
          topX,
@@ -61,8 +60,6 @@ def main(inputfile,
                    weight_fba,
                    '-weight_thermo',
                    weight_thermo,
-                   '-weight_thermo_var',
-                   weight_thermo_var,
                    '-weight_rp_steps',
                    weight_rp_steps,
                    '-max_rp_steps',
@@ -103,7 +100,6 @@ if __name__ == "__main__":
     parser.add_argument('-weight_rule_score', type=float, default=0.0)
     parser.add_argument('-weight_fba', type=float, default=0.699707)
     parser.add_argument('-weight_thermo', type=float, default=0.8334961)
-    parser.add_argument('-weight_thermo_var', type=float, default=0.0)
     parser.add_argument('-weight_rp_steps', type=float, default=0.0)
     parser.add_argument('-max_rp_steps', type=int, default=15) #WARNING: should not have a default
     parser.add_argument('-topX', type=int, default=10)
@@ -121,7 +117,6 @@ if __name__ == "__main__":
          params.weight_rule_score,
          params.weight_fba,
          params.weight_thermo,
-         params.weight_thermo_var,
          params.weight_rp_steps,
          params.max_rp_steps,
          params.topX,
