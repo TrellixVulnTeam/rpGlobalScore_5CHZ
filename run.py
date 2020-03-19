@@ -34,7 +34,7 @@ def main(inputfile,
          objective_id,
          thermo_id):
     docker_client = docker.from_env()
-    image_str = 'brsynth/rpglobalscore-standalone:dev'
+    image_str = 'brsynth/rpglobalscore-standalone'
     try:
         image = docker_client.images.get(image_str)
     except docker.errors.ImageNotFound:
