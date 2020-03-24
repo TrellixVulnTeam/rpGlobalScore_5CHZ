@@ -6,6 +6,7 @@ import logging
 from scipy import stats
 import numpy as np
 
+sys.path.insert(0, '/home/')
 import rpSBML
 
 
@@ -18,7 +19,7 @@ def nonlin(x,deriv=False):
     return 1/(1+np.exp(-x))
 
 #TODO: use rpSBML annottions function instead of manual
-## Extract the reaction SMILES from an SBML, query selenzyme and write the results back to the SBML
+## Extract the reaction SMILES from an SBML, query rule_score and write the results back to the SBML
 #
 # NOTE: all the scores are normalised by their maximal and minimal, and normalised to be higher is better
 # Higher is better
@@ -36,25 +37,34 @@ def calculateGlobalScore(rpsbml,
                          pathway_id='rp_pathway',
                          objective_id='obj_RP1_sink__restricted_biomass',
                          thermo_id='dfG_prime_m'):
+
+def genBRSynthAnnot(rpsbml):
     groups = rpsbml.model.getPlugin('groups')
     fbc = rpsbml.model.getPlugin('fbc')
     rp_pathway = groups.getGroup(pathway_id)
     members = rp_pathway.getListOfMembers()
     reactions_data = {'rule_score': {'reactions': {}, 'global': 0.0},
                       'fba': {'reactions': {}, 'global': {}},
+                      'rule_score': {'reactions': {}, 'global': 0.0},
                       'thermo': {'reactions': {}, 'global': {}}}
     #Loop through all the reactions
     for member in members:
         reactions_data['rule_score']['reactions'][member.getIdRef()] = 0.0
         reactions_data['fba']['reactions'][member.getIdRef()] = {}
+        reactions_data['rule_score']['reactions'][member.getIdRef()] = 0.0
         reactions_data['thermo']['reactions'][member.getIdRef()] = {}
         reaction = rpsbml.model.getReaction(member.getIdRef())
         annot = reaction.getAnnotation()
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(annot)
-        ####### rule_score ###########
+        ####### rule_score ############
         #higher is better
-        reactions_data['rule_score']['reactions'][member.getIdRef()] = float(brsynth_dict['rule_score'])
-        reactions_data['rule_score']['global'] += float(brsynth_dict['rule_score'])
+        try:
+            #sum of mean of top rule_score score
+            #top_rule_score = brsynth_dict['rule_score'][sorted(brsynth_dict['rule_score'], key=lambda kv: kv[1])[0]]
+            reactions_data['rule_score']['reactions'][member.getIdRef()] = brsynth_dict['rule_score']
+            reactions_data['rule_score']['global'] += brsynth_dict['rule_score']
+        except (IndexError, TypeError) as e:
+            logging.warning('Missing rule_score values for reaction: '+str(member.getIdRef()))
         ####### Thermo ############
         #lower is better
         #WARNING: we will only take the dfG_prime_m value
@@ -66,6 +76,7 @@ def calculateGlobalScore(rpsbml,
                 #reactions_data['thermo']['global'][bd_id] = 0.0
                 try:
                     if thermo_ceil>=brsynth_dict[bd_id]['value']>=thermo_floor:
+                        #min-max feature scaling
                         norm_thermo = (brsynth_dict[bd_id]['value']-thermo_floor)/(thermo_ceil-thermo_floor)
                     elif brsynth_dict[bd_id]['value']<thermo_floor:
                         norm_thermo = 0.0
@@ -98,6 +109,8 @@ def calculateGlobalScore(rpsbml,
                 except (KeyError, TypeError) as e:
                     logging.warning('Cannot find the objective: '+str(bd_id)+' for the reaction: '+str(member.getIdRef()))
                     rpsbml.addUpdateBRSynth(reaction, 'norm_'+bd_id, 0.0)
+    #print('########### reactions_data ###########')
+    #print(reactions_data)
     ##############################
     ##### target FBA value #######
     ##############################
@@ -108,7 +121,10 @@ def calculateGlobalScore(rpsbml,
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(objective.getAnnotation())
         if not objective.getId() in reactions_data['fba']['global'].keys():
             reactions_data['fba']['global'][objective.getId()] = 0.0
+        #print('------- objective ---------> '+str(objective.getId()))
+        #print(brsynth_dict)
         try:
+            #min-max feature scaling for FBA
             if fba_ceil>=float(brsynth_dict['flux_value']['value'])>=fba_floor:
                 norm_fba = (round(float(brsynth_dict['flux_value']['value']), 4)-fba_floor)/(fba_ceil-fba_floor)
             elif float(brsynth_dict['flux_value']['value'])<fba_floor:
@@ -121,18 +137,52 @@ def calculateGlobalScore(rpsbml,
             continue
         rpsbml.addUpdateBRSynth(objective, 'norm_flux_value', norm_fba)
         rpsbml.addUpdateBRSynth(rp_pathway, 'norm_'+objective.getId(), norm_fba)
+        #update the flux obj
         for flux_obj in objective.getListOfFluxObjectives():
             brsynth_dict = rpsbml.readBRSYNTHAnnotation(flux_obj.getAnnotation())
+            #min-max feature scaling
             try:
                 norm_fba = (round(float(brsynth_dict['flux_value']['value']), 4)-fba_floor)/(fba_ceil-fba_floor)
             except (KeyError, TypeError) as e:
                 norm_fba = 0.0
             rpsbml.addUpdateBRSynth(flux_obj, 'norm_flux_value', norm_fba)
+    #print('@~@~@@~@~@~@~@~@~@~@')
+    #print(reactions_data['fba']['global'])
     try:
         target_norm_fba = reactions_data['fba']['global'][objective_id]
     except KeyError:
-        logging.warning('Detected a key error for '+str(objective_id)+' in target_norm_fba calculation')
         target_norm_fba = 0.0
+    ##############################
+    #### group thermo ############
+    ##############################
+    #lower is better
+    #loop through all the reactions and retreive the thermo score for the reactions directly and sum up
+    '''if you want to use the rpThermo pathway value
+    brsynth_dict = rpsbml.readBRSYNTHAnnotation(rp_pathway.getAnnotation())
+    norm_thermo = 0.0
+    try:
+        if thermo_ceil>=brsynth_dict['dfG_prime_m']['value']>=thermo_floor:
+            #min-max feature scaling
+            norm_thermo = (brsynth_dict['dfG_prime_m']['value']-thermo_floor)/(thermo_ceil-thermo_floor)
+        elif brsynth_dict['dfG_prime_m']['value']<thermo_floor:
+            norm_thermo = 0.0
+        elif brsynth_dict['dfG_prime_m']['value']>thermo_ceil:
+            norm_thermo = 1.0
+    except (KeyError, TypeError) as e:
+        norm_thermo = 1.0
+    norm_thermo = 1.0-norm_thermo
+    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', norm_thermo)
+    '''
+    '''
+    #if you want the mean of each reaction normalisation
+    for t_id in reactions_data['thermo']['global']:
+        try:
+            reactions_data['thermo']['global'][t_id] = reactions_data['thermo']['global'][t_id]/float(len(members))
+            rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', reactions_data['thermo']['global'][t_id])
+        except KeyError:
+            reactions_data['thermo']['global'][t_id] = 0.0
+            rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', reactions_data['thermo']['global'][t_id])
+    '''
     brsynth_dict = rpsbml.readBRSYNTHAnnotation(rp_pathway.getAnnotation())
     for bd_id in brsynth_dict:
         if bd_id[:4]=='dfG_':
@@ -140,12 +190,12 @@ def calculateGlobalScore(rpsbml,
                 reactions_data['thermo']['global'][bd_id] = reactions_data['thermo']['global'][bd_id]/float(len(members))
                 rpsbml.addUpdateBRSynth(rp_pathway, 'norm_'+bd_id, reactions_data['thermo']['global'][bd_id])
             except (KeyError, TypeError) as e:
+                logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(member.getIdRef()))
                 rpsbml.addUpdateBRSynth(rp_pathway, 'norm_'+bd_id, 0.0)
-                logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(bd_id))
     try:
-        target_norm_thermo_mean = np.mean([reactions_data['thermo']['reactions'][i][thermo_id] for i in reactions_data['thermo']['reactions']])
+        target_norm_thermo = reactions_data['thermo']['global'][thermo_id]
     except KeyError:
-        target_norm_thermo_mean = 0.0
+        target_norm_thermo = 0.0
     ############################
     ##### length of members ####
     ############################
@@ -155,37 +205,45 @@ def calculateGlobalScore(rpsbml,
         norm_steps = 1.0
     else:
         try:
-            norm_steps = float(len(members))/float(max_rp_steps)
+            norm_steps = (float(len(members))-1.0)/(float(max_rp_steps)-1.0)
         except ZeroDivisionError:
             norm_steps = 0.0
     norm_steps = 1.0-norm_steps
     rpsbml.addUpdateBRSynth(rp_pathway, 'norm_steps', norm_steps)
-    ############################
-    ####### rule_score #########
-    ############################
+    ##############################
+    ####### rule_score ############
+    ##############################
     #higher is better
-    #WARNING: using norm here is redundant but is used to detect the type of annotation
-    norm_rScore = float(len(members))/reactions_data['rule_score']['global']
-    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_rule_scores', norm_rScore)
+    #NOTE: that missing rule_score value will be considered 0.0 since we divide by the number of members
+    reactions_data['rule_score']['global'] = reactions_data['rule_score']['global']/float(len(members))
+    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_rule_score', reactions_data['rule_score']['global'])
+    #print('########### reactions_data global ###########')
+    #print(reactions_data)
     ############################
     ##### global score #########
     ############################
+    ##TODO: can check the thermo value and if + then linearly reduce its score
+    #print('\t\t--------------------------- rpGlobalScore --------------------')
+    #print('\t\tSelenzyme: '+str(reactions_data['rule_score']['global'])+' * '+str(weight_rule_score)+' = '+str(reactions_data['rule_score']['global']*weight_rule_score))
+    #print('\t\tSteps: '+str(norm_steps)+' * '+str(weight_rp_steps)+' = '+str(norm_steps*weight_rp_steps))
+    #print('\t\tFBA: '+str(target_norm_fba)+' * '+str(weight_fba)+' = '+str(target_norm_fba*weight_fba))
+    #print('\t\tThermodynamics: '+str(target_norm_thermo)+' * '+str(weight_thermo)+' = '+str(target_norm_thermo*weight_thermo))
     try:
-        globalScore = (norm_steps*weight_rp_steps+
+        globalScore = (reactions_data['rule_score']['global']*weight_rule_score+
+                       norm_steps*weight_rp_steps+
                        target_norm_fba*weight_fba+
-                       norm_rScore*weight_rule_score+
-                       target_norm_thermo_mean*weight_thermo
-                       )/sum([weight_rp_steps, weight_fba, weight_thermo, weight_rule_score])
+                       target_norm_thermo*weight_thermo)/sum([weight_rp_steps, weight_rule_score, weight_fba, weight_thermo])
     except ZeroDivisionError:
-        logging.warning('Global score calculation is dividing everything by 0')
         globalScore = 0.0
+    #print('\t\tGlobal: '+str(globalScore))
     rpsbml.addUpdateBRSynth(rp_pathway, 'global_score', globalScore)
     return globalScore
 
 
 
+
 #TODO: use rpSBML annottions function instead of manual
-## Extract the reaction SMILES from an SBML, query selenzyme and write the results back to the SBML
+## Extract the reaction SMILES from an SBML, query rule_score and write the results back to the SBML
 #
 # NOTE: all the scores are normalised by their maximal and minimal, and normalised to be higher is better
 # Higher is better
@@ -205,6 +263,7 @@ def calculateGlobalScore_json(rpsbml_json,
                               thermo_id='dfG_prime_m'):
     reactions_data = {'rule_score': {'reactions': {}, 'global': 0.0},
                       'fba': {'reactions': {}, 'global': {}},
+                      'rule_score': {'reactions': [], 'global': 0.0},
                       'thermo': {'reactions': {}, 'global': {}}}
     members = len(rpsbml_json['reactions'])
     #Loop through all the reactions
@@ -212,12 +271,18 @@ def calculateGlobalScore_json(rpsbml_json,
     for reac_id in rpsbml_json['reactions']:
         reactions_data['rule_score']['reactions'][reac_id] = 0.0
         reactions_data['fba']['reactions'][reac_id] = {}
+        reactions_data['rule_score']['reactions'][reac_id] = 0.0
         reactions_data['thermo']['reactions'][reac_id] = {}
         brsynth_dict = rpsbml_json['reactions'][reac_id]
-        ####### rule_score ###########
+        ####### rule_score ############
         #higher is better
-        reactions_data['rule_score']['reactions'][member.getIdRef()] = float(brsynth_dict['rule_score'])
-        reactions_data['rule_score']['global'] += float(brsynth_dict['rule_score'])
+        try:
+            #sum of mean of top rule_score score
+            top_rule_score = brsynth_dict['rule_score'][sorted(brsynth_dict['rule_score'], key=lambda kv: kv[1])[0]]
+            reactions_data['rule_score']['reactions'][reac_id] = brsynth_dict['rule_score']
+            reactions_data['rule_score']['global'] += brsynth_dict['rule_score']
+        except (IndexError, TypeError) as e:
+            logging.warning('Missing rule_score values for reaction: '+str(reac_id))
         ####### Thermo ############
         #lower is better
         #WARNING: we will only take the dfG_prime_m value
@@ -226,8 +291,10 @@ def calculateGlobalScore_json(rpsbml_json,
                 reactions_data['thermo']['reactions'][reac_id][bd_id] = 0.0
                 if not bd_id in reactions_data['thermo']['global'].keys():
                     reactions_data['thermo']['global'][bd_id] = 0.0
+                #reactions_data['thermo']['global'][bd_id] = 0.0
                 try:
                     if thermo_ceil>=brsynth_dict[bd_id]['value']>=thermo_floor:
+                        #min-max feature scaling
                         norm_thermo = (brsynth_dict[bd_id]['value']-thermo_floor)/(thermo_ceil-thermo_floor)
                     elif brsynth_dict[bd_id]['value']<thermo_floor:
                         norm_thermo = 0.0
@@ -236,8 +303,11 @@ def calculateGlobalScore_json(rpsbml_json,
                     norm_thermo = 1.0-norm_thermo
                     reactions_data['thermo']['reactions'][reac_id][bd_id] = norm_thermo
                     reactions_data['thermo']['global'][bd_id] += norm_thermo
+                    #if bd_id==thermo_id:
+                    #    reactions_data['thermo']['global'][bd_id] += norm_thermo
                 except (KeyError, TypeError) as e:
                     logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(reac_id))
+                    #norm_thermo = 1.0
         ####### FBA ##############
         #higher is better
         #return all the FBA values
@@ -256,6 +326,8 @@ def calculateGlobalScore_json(rpsbml_json,
                     reactions_data['fba']['reactions'][reac_id][bd_id] = norm_fba
                 except (KeyError, TypeError) as e:
                     logging.warning('Cannot find the objective: '+str(bd_id)+' for the reaction: '+str(reac_id))
+    #print('########### reactions_data ###########')
+    #print(reactions_data)
     ##############################
     ##### target FBA value #######
     ##############################
@@ -266,7 +338,10 @@ def calculateGlobalScore_json(rpsbml_json,
         brsynth_dict = rpsbml_json['objectives'][obj_id]
         if not obj_id in reactions_data['fba']['global'].keys():
             reactions_data['fba']['global'][obj_id] = 0.0
+        #print('------- objective ---------> '+str(objective.getId()))
+        #print(brsynth_dict)
         try:
+            #min-max feature scaling for FBA
             if fba_ceil>=float(brsynth_dict['flux_value']['value'])>=fba_floor:
                 norm_fba = (round(float(brsynth_dict['flux_value']['value']), 4)-fba_floor)/(fba_ceil-fba_floor)
             elif float(brsynth_dict['flux_value']['value'])<fba_floor:
@@ -277,10 +352,43 @@ def calculateGlobalScore_json(rpsbml_json,
         except (KeyError, TypeError) as e:
             logging.warning('Could not retreive flux value: '+str(obj_id))
             continue
+    #print('@~@~@@~@~@~@~@~@~@~@')
+    #print(reactions_data['fba']['global'])
     try:
         target_norm_fba = reactions_data['fba']['global'][objective_id]
     except KeyError:
         target_norm_fba = 0.0
+    ##############################
+    #### group thermo ############
+    ##############################
+    #lower is better
+    #loop through all the reactions and retreive the thermo score for the reactions directly and sum up
+    '''if you want to use the rpThermo pathway value
+    brsynth_dict = rpsbml.readBRSYNTHAnnotation(rp_pathway.getAnnotation())
+    norm_thermo = 0.0
+    try:
+        if thermo_ceil>=brsynth_dict['dfG_prime_m']['value']>=thermo_floor:
+            #min-max feature scaling
+            norm_thermo = (brsynth_dict['dfG_prime_m']['value']-thermo_floor)/(thermo_ceil-thermo_floor)
+        elif brsynth_dict['dfG_prime_m']['value']<thermo_floor:
+            norm_thermo = 0.0
+        elif brsynth_dict['dfG_prime_m']['value']>thermo_ceil:
+            norm_thermo = 1.0
+    except (KeyError, TypeError) as e:
+        norm_thermo = 1.0
+    norm_thermo = 1.0-norm_thermo
+    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', norm_thermo)
+    '''
+    '''
+    #if you want the mean of each reaction normalisation
+    for t_id in reactions_data['thermo']['global']:
+        try:
+            reactions_data['thermo']['global'][t_id] = reactions_data['thermo']['global'][t_id]/float(len(members))
+            rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', reactions_data['thermo']['global'][t_id])
+        except KeyError:
+            reactions_data['thermo']['global'][t_id] = 0.0
+            rpsbml.addUpdateBRSynth(rp_pathway, 'norm_dfG_prime_m', reactions_data['thermo']['global'][t_id])
+    '''
     brsynth_dict = rpsbml_json[pathway_id]
     for bd_id in brsynth_dict:
         if bd_id[:4]=='dfG_':
@@ -289,9 +397,13 @@ def calculateGlobalScore_json(rpsbml_json,
             except (KeyError, TypeError) as e:
                 logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(bd_id))
     try:
+        #target_norm_thermo = reactions_data['thermo']['global'][thermo_id]
         target_norm_thermo_mean = np.mean([reactions_data['thermo']['reactions'][i][thermo_id] for i in reactions_data['thermo']['reactions']])
+        target_norm_thermo_var = 1.0-stats.variation([reactions_data['thermo']['reactions'][i][thermo_id] for i in reactions_data['thermo']['reactions']])
     except KeyError:
+        #target_norm_thermo = 0.0
         target_norm_thermo_mean = 0.0
+        target_norm_thermo_var = 0.0
     ############################
     ##### length of members ####
     ############################
@@ -305,24 +417,33 @@ def calculateGlobalScore_json(rpsbml_json,
         except ZeroDivisionError:
             norm_steps = 0.0
     norm_steps = 1.0-norm_steps
-    ############################
-    ####### rule_score #########
-    ############################
+    ##############################
+    ####### rule_score ############
+    ##############################
     #higher is better
-    #WARNING: using norm here is redundant but is used to detect the type of annotation
-    norm_rScore = float(len(members))/reactions_data['rule_score']['global']
-    rpsbml.addUpdateBRSynth(rp_pathway, 'norm_rule_scores', norm_rScore)
+    #NOTE: that missing rule_score value will be considered 0.0 since we divide by the number of members
+    reactions_data['rule_score']['global'] = reactions_data['rule_score']['global']/float(members)
+    #print('########### reactions_data global ###########')
+    #print(reactions_data)
     ############################
     ##### global score #########
     ############################
+    ##TODO: can check the thermo value and if + then linearly reduce its score
+    #print('\t\t--------------------------- rpGlobalScore --------------------')
+    #print('\t\tSelenzyme: '+str(reactions_data['rule_score']['global'])+' * '+str(weight_rule_score)+' = '+str(reactions_data['rule_score']['global']*weight_rule_score))
+    #print('\t\tSteps: '+str(norm_steps)+' * '+str(weight_rp_steps)+' = '+str(norm_steps*weight_rp_steps))
+    #print('\t\tFBA: '+str(target_norm_fba)+' * '+str(weight_fba)+' = '+str(target_norm_fba*weight_fba))
+    #print('\t\tThermodynamics: '+str(target_norm_thermo)+' * '+str(weight_thermo)+' = '+str(target_norm_thermo*weight_thermo))
     try:
-        globalScore = (norm_steps*weight_rp_steps+
+        globalScore = (reactions_data['rule_score']['global']*weight_rule_score+
+                       norm_steps*weight_rp_steps+
                        target_norm_fba*weight_fba+
-                       norm_rScore*weight_rule_score+
-                       target_norm_thermo_mean*weight_thermo
-                       )/sum([weight_rp_steps, weight_fba, weight_thermo, weight_rule_score])
+                       (target_norm_thermo_mean*target_norm_thermo_var)*weight_thermo
+                       )/sum([weight_rp_steps, weight_rule_score, weight_fba, weight_thermo])
     except ZeroDivisionError:
-        logging.warning('Global score calculation is dividing everything by 0')
         globalScore = 0.0
-    rpsbml.addUpdateBRSynth(rp_pathway, 'global_score', globalScore)
-    return globalScore
+    return globalScore, reactions_data
+
+
+
+

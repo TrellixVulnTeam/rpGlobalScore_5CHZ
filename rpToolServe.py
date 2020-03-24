@@ -2,45 +2,18 @@
 
 import libsbml
 import argparse
+import sys #exit using sys exit if any error is encountered
 import os
 import io
 import tarfile
 import glob
+import json
 import tempfile
-import shutil
-import logging
 
+
+sys.path.insert(0, '/home/')
 import rpSBML
 import rpTool
-
-
-'''
-##
-#
-#
-def runGlobalScore_mem(inputTar_bytes,
-                       outputTar_bytes,
-                       weight_rp_steps,
-                       weight_selenzyme,
-                       weight_fba,
-                       weight_thermo,
-                       weight_reactionRule,
-                       max_rp_steps,
-                       pathway_id,
-                       rpFBAObj_name):
-    #loop through all of them and run FBA on them
-    with tarfile.open(outputTar_bytes, 'w:xz') as tf:
-        with tarfile.open(inputTar_bytes, 'r:xz') as in_tf:
-            for member in in_tf.getmembers():
-                if not member.name=='':
-                    rpsbml = rpSBML.rpSBML(member_name, libsbml.readSBMLFromString(in_tf.extractfile(member).read().decode("utf-8")))
-                    globalScore = calculateGlobalScore(rpsbml, weight_rp_steps, weight_selenzyme, weight_fba, weight_thermo, weight_reactionRule, max_rp_steps, pathway_id, rpFBAObj_name)
-                    data = libsbml.writeSBMLToString(rpsbml.document).encode('utf-8')
-                    fiOut = io.BytesIO(data)
-                    info = tarfile.TarInfo(member.name)
-                    info.size = len(data)
-                    tf.addfile(tarinfo=info, fileobj=fiOut)
-'''
 
 
 ## run using HDD 3X less than the above function
@@ -49,7 +22,6 @@ def runGlobalScore_mem(inputTar_bytes,
 def runGlobalScore_hdd(inputTar,
                        outputTar,
                        weight_rp_steps,
-                       weight_rule_score,
                        weight_fba,
                        weight_thermo,
                        max_rp_steps,
@@ -70,24 +42,20 @@ def runGlobalScore_hdd(inputTar,
             for sbml_path in glob.glob(tmpInputFolder+'/*'):
                 fileName = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '').replace('.rpsbml', '')
                 rpsbml = rpSBML.rpSBML(fileName)
-                try:
-                    rpsbml.readSBML(sbml_path)
-                except FileNotFoundError:
-                    logging.warning('Error reading file '+str(fileName))
-                    continue
+                rpsbml.readSBML(sbml_path)
                 globalScore = rpTool.calculateGlobalScore(rpsbml,
-                                                   weight_rp_steps,
-                                                   weight_rule_score,
-                                                   weight_fba,
-                                                   weight_thermo,
-                                                   max_rp_steps,
-                                                   thermo_ceil,
-                                                   thermo_floor,
-                                                   fba_ceil,
-                                                   fba_floor,
-                                                   pathway_id,
-                                                   objective_id,
-                                                   thermo_id)
+                                                          weight_rp_steps,
+                                                          weight_selenzyme,
+                                                          weight_fba,
+                                                          weight_thermo,
+                                                          max_rp_steps,
+                                                          thermo_ceil,
+                                                          thermo_floor,
+                                                          fba_ceil,
+                                                          fba_floor,
+                                                          pathway_id,
+                                                          objective_id,
+                                                          thermo_id)
                 fileNames_score[fileName] = globalScore
                 rpsbml.writeSBML(tmpOutputFolder)
             #sort the results
@@ -100,44 +68,42 @@ def runGlobalScore_hdd(inputTar,
                         info = tarfile.TarInfo(fileName)
                         info.size = os.path.getsize(sbml_path)
                         ot.addfile(tarinfo=info, fileobj=open(sbml_path, 'rb'))
+    return fileNames_score
 
-##
+
+## RetroPath2.0 reader for local packages
 #
 #
-def main(inputTar,
-         outputTar,
-         topX,
-         weight_rp_steps=0.0,
-         weight_rule_score=0.1469727,
-         weight_fba=0.699707,
-         weight_thermo=0.8334961,
-         max_rp_steps=15,
-         thermo_ceil=8901.2,
-         thermo_floor=-7570.2,
-         fba_ceil=999999.0,
-         fba_floor=0.0,
-         pathway_id='rp_pathway',
-         objective_id='obj_rpFBA_frac',
-         thermo_id='dfG_prime_m'):
-    with open(inputTar, 'rb') as inputTar_bytes:
-        outputTar_bytes = io.BytesIO()
-        runGlobalScore_hdd(inputTar_bytes,
-                           outputTar_bytes,
-                           weight_rp_steps,
-                           weight_rule_score,
-                           weight_fba,
-                           weight_thermo,
-                           max_rp_steps,
-                           topX,
-                           thermo_ceil,
-                           thermo_floor,
-                           fba_ceil,
-                           fba_floor,
-                           pathway_id,
-                           objective_id,
-                           thermo_id)
-        ########## IMPORTANT #####
-        outputTar_bytes.seek(0)
-        ##########################
-        with open(outputTar, 'wb') as f:
-            shutil.copyfileobj(outputTar_bytes, f, length=131072)
+def runGlobalScore_json(rpsbml_json,
+                        weight_rp_steps,
+                        weight_selenzyme,
+                        weight_fba,
+                        weight_thermo,
+                        max_rp_steps,
+                        topX,
+                        thermo_ceil=8901.2,
+                        thermo_floor=-7570.2,
+                        fba_ceil=5.0,
+                        fba_floor=0.0,
+                        pathway_id='rp_pathway',
+                        objective_id='obj_RP1_sink__restricted_biomass',
+                        thermo_id='dfG_prime_m'):
+    fileNames_score = {}
+    for rpsbml_id in rpsbml_json:
+        globalScore = rpTool.calculateGlobalScore_json(rpsbml_json[rpsbml_id],
+                                                       weight_rp_steps,
+                                                       weight_selenzyme,
+                                                       weight_fba,
+                                                       weight_thermo,
+                                                       #weight_thermo_var,
+                                                       max_rp_steps,
+                                                       thermo_ceil,
+                                                       thermo_floor,
+                                                       fba_ceil,
+                                                       fba_floor,
+                                                       pathway_id,
+                                                       objective_id,
+                                                       thermo_id)
+        fileNames_score[rpsbml_id] = globalScore
+    return fileNames_score
+
