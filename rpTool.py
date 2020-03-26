@@ -118,7 +118,7 @@ def calculateGlobalScore_json(rpsbml_json,
             rpsbml_json['pathway']['norm_'+bd_id] = {}
             rpsbml_json['pathway']['norm_'+bd_id]['value'] = 1.0-sum(path_norm[bd_id])/len(rpsbml_json['reactions'])
     ############# rule score ############
-    #lower is better
+    #higher is better
     for bd_id in path_norm:
         if bd_id=='rule_score':
     if not 'rule_score' in path_norm: 
@@ -127,7 +127,7 @@ def calculateGlobalScore_json(rpsbml_json,
         rpsbml_json['pathway']['norm_'+bd_id]['value'] = 0.0
     else:
         rpsbml_json['pathway']['norm_'+bd_id] = {}
-        rpsbml_json['pathway']['norm_'+bd_id]['value'] = 1.0-sum(path_norm[bd_id])/len(rpsbml_json['reactions'])
+        rpsbml_json['pathway']['norm_'+bd_id]['value'] = sum(path_norm[bd_id])/len(rpsbml_json['reactions'])
     ##### length of pathway ####
     #lower is better
     norm_steps = 0.0
@@ -178,3 +178,4 @@ def genBRSynthJSON(rpsbml, pathway_id='rp_pathway'):
 
 
 def updateBRSynthPathway(rpsbml, rpsbml_json):
+    
