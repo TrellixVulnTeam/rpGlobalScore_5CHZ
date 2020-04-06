@@ -225,22 +225,16 @@ def updateBRSynthPathway(rpsbml, rpsbml_json, pathway_id='rp_pathway'):
     rp_pathway = groups.getGroup(pathway_id)
     for bd_id in rpsbml_json['pathway']['brsynth']:
         if bd_id[:5]=='norm_':
-            print(bd_id)
-            print(rpsbml_json['pathway']['brsynth'])
-            print(rpsbml_json['pathway']['brsynth'][bd_id])
             try:
                 value = rpsbml_json['pathway']['brsynth'][bd_id]['value']
             except KeyError:
                 logging.warning('The entry '+str(db_id)+' doesnt contain value')
-                continue
+                logging.warning('No" value", using the root')
             try:
                 units = rpsbml_json['pathway']['brsynth'][bd_id]['units']
             except KeyError:
                 units = None
-            if units:
-                rpsbml.addUpdateBRSynth(rp_pathway, bd_id, rpsbml_json['pathway']['brsynth'][bd_id], units, False)
-            else:
-                rpsbml.addUpdateBRSynth(rp_pathway, bd_id, rpsbml_json['pathway']['brsynth'][bd_id], None, False)
+            rpsbml.addUpdateBRSynth(rp_pathway, bd_id, value, units, False)
     for reac_id in rpsbml_json['reactions']:
         reaction = rpsbml.model.getReaction(reac_id)
         if reaction==None:
@@ -249,19 +243,12 @@ def updateBRSynthPathway(rpsbml, rpsbml_json, pathway_id='rp_pathway'):
         for bd_id in rpsbml_json['reactions'][reac_id]['brsynth']:
             if bd_id[:5]=='norm_':
                 try:
-                    print(reac_id)
-                    print(bd_id)
-                    print(rpsbml_json['reactions'][reac_id]['brsynth'][bd_id])
-                    print(rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'])
                     value = rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']
                 except KeyError:
                     value = rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]
-                    continue
+                    logging.warning('No" value", using the root')
                 try:
                     units = rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['units']
                 except KeyError:
                     units = None
-                if units:
-                    rpsbml.addUpdateBRSynth(reaction, bd_id, rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'], units, False)
-                else:
-                    rpsbml.addUpdateBRSynth(reaction, bd_id, rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'], None, False)
+                rpsbml.addUpdateBRSynth(reaction, bd_id, value, units, False)
