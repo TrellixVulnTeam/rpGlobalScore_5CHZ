@@ -104,10 +104,8 @@ def calculateGlobalScore(rpsbml,
     #higher is better
     #loop through all the different objectives and normalise the values
     #find the objective
-    print(fbc.getListOfObjectives())
     for objective in fbc.getListOfObjectives():
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(objective.getAnnotation())
-        print(brsynth_dict)
         if not objective.getId() in reactions_data['fba']['global'].keys():
             reactions_data['fba']['global'][objective.getId()] = 0.0
         try:

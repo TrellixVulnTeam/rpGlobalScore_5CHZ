@@ -13,23 +13,6 @@ import rpToolServe
 ##
 #
 #
-'''
-def runGlobalScore_hdd(inputTar,
-                       outputTar,
-                       weight_rp_steps,
-                       weight_rule_score,
-                       weight_fba,
-                       weight_thermo,
-                       max_rp_steps,
-                       topX,
-                       thermo_ceil=8901.2,
-                       thermo_floor=-7570.2,
-                       fba_ceil=5.0,
-                       fba_floor=0.0,
-                       pathway_id='rp_pathway',
-                       objective_id='obj_RP1_sink__restricted_biomass',
-                       thermo_id='dfG_prime_m'):
-'''
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Given an SBML, extract the reaction rules and pass them to Selenzyme REST service and write the results to the SBML')
     parser.add_argument('-input', type=str)
