@@ -178,7 +178,7 @@ def calculateGlobalScore_rpsbml(rpsbml,
                                 pathway_id='rp_pathway',
                                 objective_id='obj_RP1_sink__restricted_biomass',
                                 thermo_id='dfG_prime_m'):
-    rpsbml_json = genJSON(rpsbml, pathway_id)
+    rpsbml_json = rpsbml.genJSON(pathway_id)
     globalscore = calculateGlobalScore_json(rpsbml_json,
                                             weight_rp_steps,
                                             weight_rule_score,
@@ -194,27 +194,6 @@ def calculateGlobalScore_rpsbml(rpsbml,
                                             thermo_id)
     updateBRSynthPathway(rpsbml, rpsbml_json, pathway_id)
     return globalscore
-
-
-def genJSON(rpsbml, pathway_id='rp_pathway'):
-    groups = rpsbml.model.getPlugin('groups')
-    rp_pathway = groups.getGroup(pathway_id)
-    reactions = rp_pathway.getListOfMembers()
-    #Loop through all the reactions
-    rpsbml_json = {}
-    rpsbml_json['pathway'] = {}
-    rpsbml_json['pathway']['brsynth'] = rpsbml.readBRSYNTHAnnotation(rp_pathway.getAnnotation())
-    rpsbml_json['reactions'] = {}
-    for member in reactions:
-        reaction = rpsbml.model.getReaction(member.getIdRef())
-        annot = reaction.getAnnotation()
-        rpsbml_json['reactions'][member.getIdRef()] = {}
-        rpsbml_json['reactions'][member.getIdRef()]['brsynth'] = rpsbml.readBRSYNTHAnnotation(annot)
-        rpsbml_json['reactions'][member.getIdRef()]['miriam'] = rpsbml.readMIRIAMAnnotation(annot)
-    with open('tmp.json', 'w') as oj:
-        json.dump(rpsbml_json, oj)
-    return rpsbml_json
-
 
 
 def updateBRSynthPathway(rpsbml, rpsbml_json, pathway_id='rp_pathway'):
