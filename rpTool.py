@@ -53,8 +53,8 @@ def calculateGlobalScore(rpsbml,
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(annot)
         ####### rule_score ###########
         #higher is better
-        reactions_data['rule_score']['reactions'][member.getIdRef()] = float(brsynth_dict['rule_score'])
-        reactions_data['rule_score']['global'] += float(brsynth_dict['rule_score'])
+        reactions_data['rule_score']['reactions'][member.getIdRef()] = float(brsynth_dict['rule_score']['value'])
+        reactions_data['rule_score']['global'] += float(brsynth_dict['rule_score']['value'])
         ####### Thermo ############
         #lower is better
         #WARNING: we will only take the dfG_prime_m value
@@ -104,8 +104,10 @@ def calculateGlobalScore(rpsbml,
     #higher is better
     #loop through all the different objectives and normalise the values
     #find the objective
+    print(fbc.getListOfObjectives())
     for objective in fbc.getListOfObjectives():
         brsynth_dict = rpsbml.readBRSYNTHAnnotation(objective.getAnnotation())
+        print(brsynth_dict)
         if not objective.getId() in reactions_data['fba']['global'].keys():
             reactions_data['fba']['global'][objective.getId()] = 0.0
         try:

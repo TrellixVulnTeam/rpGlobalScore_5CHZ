@@ -13,25 +13,41 @@ import rpToolServe
 ##
 #
 #
+'''
+def runGlobalScore_hdd(inputTar,
+                       outputTar,
+                       weight_rp_steps,
+                       weight_rule_score,
+                       weight_fba,
+                       weight_thermo,
+                       max_rp_steps,
+                       topX,
+                       thermo_ceil=8901.2,
+                       thermo_floor=-7570.2,
+                       fba_ceil=5.0,
+                       fba_floor=0.0,
+                       pathway_id='rp_pathway',
+                       objective_id='obj_RP1_sink__restricted_biomass',
+                       thermo_id='dfG_prime_m'):
+'''
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Given an SBML, extract the reaction rules and pass them to Selenzyme REST service and write the results to the SBML')
     parser.add_argument('-input', type=str)
     parser.add_argument('-input_format', type=str)
     parser.add_argument('-output', type=str)
-    parser.add_argument('-weight_rule_score', type=float)
-    parser.add_argument('-weight_fba', type=float)
-    parser.add_argument('-weight_thermo', type=float)
-    parser.add_argument('-weight_thermo_var', type=float)
-    parser.add_argument('-weight_rp_steps', type=float)
-    parser.add_argument('-max_rp_steps', type=int)
-    parser.add_argument('-topX', type=int)
-    parser.add_argument('-thermo_ceil', type=float)
-    parser.add_argument('-thermo_floor', type=float)
-    parser.add_argument('-fba_ceil', type=float)
-    parser.add_argument('-fba_floor', type=float)
-    parser.add_argument('-pathway_id', type=str)
-    parser.add_argument('-objective_id', type=str)
-    parser.add_argument('-thermo_id', type=str)
+    parser.add_argument('-weight_rule_score', type=float, default=0.0)
+    parser.add_argument('-weight_fba', type=float, default=0.699707)
+    parser.add_argument('-weight_thermo', type=float, default=0.8334961)
+    parser.add_argument('-weight_rp_steps', type=float, default=0.0)
+    parser.add_argument('-max_rp_steps', type=int, default=15)
+    parser.add_argument('-topX', type=int, default=10)
+    parser.add_argument('-thermo_ceil', type=float, default=8901.2)
+    parser.add_argument('-thermo_floor', type=float, default=-7570.2)
+    parser.add_argument('-fba_ceil', type=float, default=5.0)
+    parser.add_argument('-fba_floor', type=float, default=0.0)
+    parser.add_argument('-pathway_id', type=str, default='rp_pathway')
+    parser.add_argument('-objective_id', type=str, default='obj_RP1_sink__restricted_biomass')
+    parser.add_argument('-thermo_id', type=str, default='dfG_prime_m')
     params = parser.parse_args()
     if params.input_format=='tar':
         rpToolServe.main(params.input,
@@ -41,7 +57,6 @@ if __name__ == "__main__":
                          params.weight_rule_score,
                          params.weight_fba,
                          params.weight_thermo,
-                         params.weight_thermo_var,
                          params.max_rp_steps,
                          params.thermo_ceil,
                          params.thermo_floor,
@@ -67,7 +82,6 @@ if __name__ == "__main__":
                              params.weight_rule_score,
                              params.weight_fba,
                              params.weight_thermo,
-                             params.weight_thermo_var,
                              params.max_rp_steps,
                              params.thermo_ceil,
                              params.thermo_floor,
