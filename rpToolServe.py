@@ -63,7 +63,7 @@ def runGlobalScore_hdd(inputTar,
                        thermo_id='dfG_prime_m'):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
-            tar = tarfile.open(fileobj=inputTar, mode='r')
+            tar = tarfile.open(inputTar, mode='r')
             tar.extractall(path=tmpInputFolder)
             tar.close()
             fileNames_score = {}
@@ -119,25 +119,24 @@ def main(inputTar,
          pathway_id='rp_pathway',
          objective_id='obj_rpFBA_frac',
          thermo_id='dfG_prime_m'):
-    with open(inputTar, 'rb') as inputTar_bytes:
-        outputTar_bytes = io.BytesIO()
-        runGlobalScore_hdd(inputTar_bytes,
-                           outputTar_bytes,
-                           weight_rp_steps,
-                           weight_rule_score,
-                           weight_fba,
-                           weight_thermo,
-                           max_rp_steps,
-                           topX,
-                           thermo_ceil,
-                           thermo_floor,
-                           fba_ceil,
-                           fba_floor,
-                           pathway_id,
-                           objective_id,
-                           thermo_id)
-        ########## IMPORTANT #####
-        outputTar_bytes.seek(0)
-        ##########################
-        with open(outputTar, 'wb') as f:
-            shutil.copyfileobj(outputTar_bytes, f, length=131072)
+    outputTar_bytes = io.BytesIO()
+    runGlobalScore_hdd(inputTar,
+                       outputTar_bytes,
+                       weight_rp_steps,
+                       weight_rule_score,
+                       weight_fba,
+                       weight_thermo,
+                       max_rp_steps,
+                       topX,
+                       thermo_ceil,
+                       thermo_floor,
+                       fba_ceil,
+                       fba_floor,
+                       pathway_id,
+                       objective_id,
+                       thermo_id)
+    ########## IMPORTANT #####
+    outputTar_bytes.seek(0)
+    ##########################
+    with open(outputTar, 'wb') as f:
+        shutil.copyfileobj(outputTar_bytes, f, length=131072)
