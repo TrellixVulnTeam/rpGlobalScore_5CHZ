@@ -74,6 +74,7 @@ def calculateGlobalScore_json(rpsbml_json,
             #return all the FBA values
             #------- reactions ----------
             elif bd_id[:4]=='fba_':
+                print(rpsbml_json)
                 rpsbml_json['fba']['reactions'][reac_id]['brsynth'][bd_id] = 0.0
                 try:
                     norm_fba = 0.0
