@@ -39,6 +39,9 @@ def runGlobalScore_hdd(inputTar,
             tar = tarfile.open(inputTar, mode='r')
             tar.extractall(path=tmpInputFolder)
             tar.close()
+            if len(glob.glob(tmpInputFolder+'/*'))==0:
+                logging.error('Input is empty')
+                return {}
             file_names_score = {}
             for sbml_path in glob.glob(tmpInputFolder+'/*'):
                 file_name = sbml_path.split('/')[-1].replace('.sbml', '').replace('.xml', '').replace('.rpsbml', '')
@@ -61,6 +64,9 @@ def runGlobalScore_hdd(inputTar,
                 rpsbml.writeSBML(tmpOutputFolder)
             #sort the results
             top_file_names = [k for k, v in sorted(file_names_score.items(), key=lambda item: item[1])][:topX]
+            if len(glob.glob(tmpOutputFolder+'/*'))==0:
+                logging.error('rpGlobalScore has not generated any results')
+                return {}
             with tarfile.open(outputTar, mode='w:xz') as ot:
                 for sbml_path in glob.glob(tmpOutputFolder+'/*'):
                     file_name = str(sbml_path.split('/')[-1].replace('.rpsbml', '').replace('.sbml', '').replace('.xml', ''))
@@ -70,4 +76,3 @@ def runGlobalScore_hdd(inputTar,
                         info.size = os.path.getsize(sbml_path)
                         ot.addfile(tarinfo=info, fileobj=open(sbml_path, 'rb'))
     return file_names_score
-
