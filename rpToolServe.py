@@ -68,11 +68,11 @@ def runGlobalScore_hdd(inputTar,
             if len(glob.glob(tmpOutputFolder+'/*'))==0:
                 logging.error('rpGlobalScore has not generated any results')
                 return {}
-            with tarfile.open(outputTar, mode='w:xz') as ot:
+            with tarfile.open(outputTar, mode='w:gz') as ot:
                 for sbml_path in glob.glob(tmpOutputFolder+'/*'):
                     file_name = str(sbml_path.split('/')[-1].replace('.rpsbml', '').replace('.sbml', '').replace('.xml', ''))
                     if file_name in top_file_names:
-                        file_name += '.rpsbml.xml'
+                        file_name += '.sbml.xml'
                         info = tarfile.TarInfo(file_name)
                         info.size = os.path.getsize(sbml_path)
                         ot.addfile(tarinfo=info, fileobj=open(sbml_path, 'rb'))
