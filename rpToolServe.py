@@ -5,6 +5,7 @@ import argparse
 import sys #exit using sys exit if any error is encountered
 import os
 import io
+import logging
 import tarfile
 import glob
 import json
