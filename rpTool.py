@@ -199,7 +199,7 @@ def updateBRSynthPathway(rpsbml, rpsbml_json, pathway_id='rp_pathway'):
     groups = rpsbml.model.getPlugin('groups')
     rp_pathway = groups.getGroup(pathway_id)
     for bd_id in rpsbml_json['pathway']['brsynth']:
-        if bd_id[:5]=='norm_':
+        if bd_id[:5]=='norm_' or bd_id=='global_score':
             try:
                 value = rpsbml_json['pathway']['brsynth'][bd_id]['value']
             except KeyError:
