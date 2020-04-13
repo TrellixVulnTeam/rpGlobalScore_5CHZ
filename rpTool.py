@@ -12,7 +12,7 @@ import rpSBML
 
 
 ## Normalise by sigmoidal function
-#
+# NOT USED
 #
 def nonlin(x,deriv=False):
     if(deriv==True):
