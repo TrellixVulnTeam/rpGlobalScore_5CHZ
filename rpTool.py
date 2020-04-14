@@ -176,9 +176,9 @@ def calculateGlobalScore_json(rpsbml_json,
     rpsbml_json['pathway']['brsynth']['norm_steps']['value'] = norm_steps
     ##### global score #########
     try:
-        globalScore = np.average([rpsbml_json['pathway']['brsynth']['norm_rule_score']['value']+
-                                  rpsbml_json['pathway']['brsynth']['norm_'+str(thermo_id)]['value']+
-                                  rpsbml_json['pathway']['brsynth']['norm_steps']['value']+
+        globalScore = np.average([rpsbml_json['pathway']['brsynth']['norm_rule_score']['value'],
+                                  rpsbml_json['pathway']['brsynth']['norm_'+str(thermo_id)]['value'],
+                                  rpsbml_json['pathway']['brsynth']['norm_steps']['value'],
                                   rpsbml_json['pathway']['brsynth']['norm_fba_'+str(objective_id)]['value']],
                                   weights=[weight_rule_score, weight_thermo, weight_rp_steps, weight_fba]
                                  )
