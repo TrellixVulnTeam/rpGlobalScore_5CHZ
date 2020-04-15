@@ -21,6 +21,8 @@ def nonlin(x,deriv=False):
 
 ## Extract the reaction SMILES from an SBML, query rule_score and write the results back to the SBML
 #
+# Higher is better
+#
 # NOTE: all the scores are normalised by their maximal and minimal, and normalised to be higher is better
 # Higher is better
 #TODO: try to standardize the values instead of normalisation.... Advantage: not bounded
@@ -57,13 +59,24 @@ def calculateGlobalScore_json(rpsbml_json,
                         #min-max feature scaling
                         norm_thermo = (rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']-thermo_floor)/(thermo_ceil-thermo_floor)
                     elif rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']<thermo_floor:
-                        norm_thermo = 0.0
-                    elif rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']>thermo_ceil:
+                        #maximise
                         norm_thermo = 1.0
+                        #minimise
+                        #norm_thermo = 0.0
+                    elif rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']>thermo_ceil:
+                        #maximise
+                        norm_thermo = 0.0
+                        #minimise
+                        #norm_thermo = 1.0
+                    #minimize
+                    #maximise
                     norm_thermo = 1.0-norm_thermo
                 except (KeyError, TypeError) as e:
                     logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(reac_id))
+                    #maximise
                     norm_thermo = 1.0
+                    #minimise
+                    #norm_thermo = 0.0
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id] = {}
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id]['value'] = norm_thermo
                 path_norm[bd_id].append(norm_thermo)
@@ -78,19 +91,32 @@ def calculateGlobalScore_json(rpsbml_json,
                         #min-max feature scaling
                         norm_fba = (rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']-fba_floor)/(fba_ceil-fba_floor)
                     elif rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']<=fba_floor:
+                        #maximise
                         norm_fba = 0.0
+                        #minimise
+                        #norm_fba = 1.0
                     elif rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']>fba_ceil:
+                        #maximise
                         norm_fba = 1.0
+                        #minimise
+                        #norm_fba = 0.0
                     rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'] = norm_fba
                 except (KeyError, TypeError) as e:
+                    #maximise
                     norm_fba = 0.0
+                    #minimise
+                    #norm_fba = 1.0
                     logging.warning('Cannot find the objective: '+str(bd_id)+' for the reaction: '+str(reac_id))
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id] = {}
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id]['value'] = norm_fba
             elif bd_id=='rule_score':
                 if bd_id not in path_norm:
                     path_norm[bd_id] = []
+                #rule score higher is better
+                #maximise
                 path_norm[bd_id].append(rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'])
+                #minimise
+                #path_norm[bd_id].append(1.0-rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'])
             else:
                 logging.info('Not normalising: '+str(bd_id))
     ####################################################################################################### 
@@ -118,7 +144,8 @@ def calculateGlobalScore_json(rpsbml_json,
     for bd_id in path_norm:
         if bd_id[:4]=='dfG_':
             rpsbml_json['pathway']['brsynth']['norm_'+bd_id] = {}
-            rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = 1.0-sum(path_norm[bd_id])/len(rpsbml_json['reactions'])
+            #here add weights based on std
+            rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = np.average(path_norm[bd_id])
     ############# rule score ############
     #higher is better
     if not 'rule_score' in path_norm:
@@ -127,7 +154,7 @@ def calculateGlobalScore_json(rpsbml_json,
         rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = 0.0
     else:
         rpsbml_json['pathway']['brsynth']['norm_'+bd_id] = {}
-        rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = sum(path_norm[bd_id])/len(rpsbml_json['reactions'])
+        rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = np.average(path_norm[bd_id])
     ##### length of pathway ####
     #lower is better
     norm_steps = 0.0
@@ -140,15 +167,26 @@ def calculateGlobalScore_json(rpsbml_json,
         except ZeroDivisionError:
             norm_steps = 0.0
     norm_steps = 1.0-norm_steps
+    #################################################
+    ################# GLOBAL ########################
+    #################################################
     rpsbml_json['pathway']['brsynth']['norm_steps'] = {}
     rpsbml_json['pathway']['brsynth']['norm_steps']['value'] = norm_steps
     ##### global score #########
     try:
+        globalScore = np.average([rpsbml_json['pathway']['brsynth']['norm_rule_score']['value'],
+                                  rpsbml_json['pathway']['brsynth']['norm_'+str(thermo_id)]['value'],
+                                  rpsbml_json['pathway']['brsynth']['norm_steps']['value'],
+                                  rpsbml_json['pathway']['brsynth']['norm_fba_'+str(objective_id)]['value']],
+                                  weights=[weight_rule_score, weight_thermo, weight_rp_steps, weight_fba]
+                                 )
+        '''
         globalScore = (rpsbml_json['pathway']['brsynth']['norm_rule_score']['value']*weight_rule_score+
                        rpsbml_json['pathway']['brsynth']['norm_'+str(thermo_id)]['value']*weight_thermo+
                        rpsbml_json['pathway']['brsynth']['norm_steps']['value']*weight_rp_steps+
                        rpsbml_json['pathway']['brsynth']['norm_fba_'+str(objective_id)]['value']*weight_fba
                        )/sum([weight_rule_score, weight_thermo, weight_rp_steps, weight_fba])
+        '''
     except ZeroDivisionError:
         globalScore = 0.0
     except KeyError as e:
