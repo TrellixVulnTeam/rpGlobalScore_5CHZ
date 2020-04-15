@@ -12,7 +12,7 @@ import rpSBML
 
 
 ## Normalise by sigmoidal function
-#
+# NOT USED
 #
 def nonlin(x,deriv=False):
     if(deriv==True):
@@ -152,6 +152,7 @@ def calculateGlobalScore_json(rpsbml_json,
     except ZeroDivisionError:
         globalScore = 0.0
     except KeyError as e:
+        logging.error(rpsbml_json['pathway']['brsynth'].keys())
         logging.error('KeyError for :'+str(e))
         globalScore = 0.0
     rpsbml_json['pathway']['brsynth']['global_score'] = {}
@@ -197,7 +198,7 @@ def updateBRSynthPathway(rpsbml, rpsbml_json, pathway_id='rp_pathway'):
     groups = rpsbml.model.getPlugin('groups')
     rp_pathway = groups.getGroup(pathway_id)
     for bd_id in rpsbml_json['pathway']['brsynth']:
-        if bd_id[:5]=='norm_':
+        if bd_id[:5]=='norm_' or bd_id=='global_score':
             try:
                 value = rpsbml_json['pathway']['brsynth'][bd_id]['value']
             except KeyError:
