@@ -150,6 +150,11 @@ def calculateGlobalScore_json(rpsbml_json,
     #################################################
     rpsbml_json['pathway']['brsynth']['norm_steps'] = {}
     rpsbml_json['pathway']['brsynth']['norm_steps']['value'] = norm_steps
+    logging.info('Using the following values for the global score:')
+    logging.info('Rule Score: '+str(rpsbml_json['pathway']['brsynth']['norm_rule_score']['value']))
+    logging.info('Thermo: '+str(rpsbml_json['pathway']['brsynth']['norm_'+str(thermo_id)]['value']))
+    logging.info('Steps: '+str(rpsbml_json['pathway']['brsynth']['norm_steps']['value']))
+    logging.info('FBA ('+str('norm_fba_'+str(objective_id))+'): '+str(rpsbml_json['pathway']['brsynth']['norm_fba_'+str(objective_id)]['value']))
     ##### global score #########
     try:
         globalScore = np.average([rpsbml_json['pathway']['brsynth']['norm_rule_score']['value'],
