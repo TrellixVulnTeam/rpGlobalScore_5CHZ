@@ -29,7 +29,7 @@ if __name__ == "__main__":
     parser.add_argument('-fba_ceil', type=float, default=5.0)
     parser.add_argument('-fba_floor', type=float, default=0.0)
     parser.add_argument('-pathway_id', type=str, default='rp_pathway')
-    parser.add_argument('-objective_id', type=str, default='obj_RP1_sink__restricted_biomass')
+    parser.add_argument('-objective_id', type=str, default='obj_fraction')
     parser.add_argument('-thermo_id', type=str, default='dfG_prime_m')
     params = parser.parse_args()
     if params.input_format=='tar':

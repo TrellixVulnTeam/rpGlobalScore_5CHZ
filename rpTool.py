@@ -39,7 +39,7 @@ def calculateGlobalScore_json(rpsbml_json,
                               fba_ceil=5.0,
                               fba_floor=0.0,
                               pathway_id='rp_pathway',
-                              objective_id='obj_RP1_sink__restricted_biomass',
+                              objective_id='obj_fraction',
                               thermo_id='dfG_prime_m'):
     path_norm = {}
     ####################################################################################################### 
@@ -51,7 +51,7 @@ def calculateGlobalScore_json(rpsbml_json,
         list_bd_id = list(rpsbml_json['reactions'][reac_id]['brsynth'].keys())
         for bd_id in list_bd_id:
             ####### Thermo ############
-            #lower is better
+            #lower is better -> -1.0 to have highest better
             #WARNING: we will only take the dfG_prime_m value
             if bd_id[:4]=='dfG_':
                 if bd_id not in path_norm:
@@ -60,25 +60,14 @@ def calculateGlobalScore_json(rpsbml_json,
                     if thermo_ceil>=rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']>=thermo_floor:
                         #min-max feature scaling
                         norm_thermo = (rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']-thermo_floor)/(thermo_ceil-thermo_floor)
+                        norm_thermo = 1.0-norm_thermo
                     elif rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']<thermo_floor:
-                        #maximise
                         norm_thermo = 1.0
-                        #minimise
-                        #norm_thermo = 0.0
                     elif rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']>thermo_ceil:
-                        #maximise
                         norm_thermo = 0.0
-                        #minimise
-                        #norm_thermo = 1.0
-                    #minimize
-                    #maximise
-                    norm_thermo = 1.0-norm_thermo
                 except (KeyError, TypeError) as e:
                     logging.warning('Cannot find the thermo: '+str(bd_id)+' for the reaction: '+str(reac_id))
-                    #maximise
                     norm_thermo = 1.0
-                    #minimise
-                    #norm_thermo = 0.0
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id] = {}
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id]['value'] = norm_thermo
                 path_norm[bd_id].append(norm_thermo)
@@ -93,21 +82,12 @@ def calculateGlobalScore_json(rpsbml_json,
                         #min-max feature scaling
                         norm_fba = (rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']-fba_floor)/(fba_ceil-fba_floor)
                     elif rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']<=fba_floor:
-                        #maximise
                         norm_fba = 0.0
-                        #minimise
-                        #norm_fba = 1.0
                     elif rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']>fba_ceil:
-                        #maximise
                         norm_fba = 1.0
-                        #minimise
-                        #norm_fba = 0.0
                     rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'] = norm_fba
                 except (KeyError, TypeError) as e:
-                    #maximise
                     norm_fba = 0.0
-                    #minimise
-                    #norm_fba = 1.0
                     logging.warning('Cannot find the objective: '+str(bd_id)+' for the reaction: '+str(reac_id))
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id] = {}
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id]['value'] = norm_fba
@@ -115,10 +95,7 @@ def calculateGlobalScore_json(rpsbml_json,
                 if bd_id not in path_norm:
                     path_norm[bd_id] = []
                 #rule score higher is better
-                #maximise
                 path_norm[bd_id].append(rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'])
-                #minimise
-                #path_norm[bd_id].append(1.0-rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'])
             else:
                 logging.info('Not normalising: '+str(bd_id))
     ####################################################################################################### 
@@ -142,7 +119,6 @@ def calculateGlobalScore_json(rpsbml_json,
             rpsbml_json['pathway']['brsynth']['norm_'+bd_id] = {}
             rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = norm_fba
     ############# thermo ################
-    #lower is better
     for bd_id in path_norm:
         if bd_id[:4]=='dfG_':
             rpsbml_json['pathway']['brsynth']['norm_'+bd_id] = {}
@@ -158,17 +134,17 @@ def calculateGlobalScore_json(rpsbml_json,
         rpsbml_json['pathway']['brsynth']['norm_'+bd_id] = {}
         rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = np.average(path_norm[bd_id])
     ##### length of pathway ####
-    #lower is better
+    #lower is better -> -1.0 to reverse it
     norm_steps = 0.0
     if len(rpsbml_json['reactions'])>max_rp_steps:
         logging.warning('There are more steps than specified')
-        norm_steps = 1.0
+        norm_steps = 0.0
     else:
         try:
             norm_steps = (float(len(rpsbml_json['reactions']))-1.0)/(float(max_rp_steps)-1.0)
+            norm_steps = 1.0-norm_steps
         except ZeroDivisionError:
             norm_steps = 0.0
-    norm_steps = 1.0-norm_steps
     #################################################
     ################# GLOBAL ########################
     #################################################
@@ -214,7 +190,7 @@ def calculateGlobalScore_rpsbml(rpsbml,
                                 fba_ceil=5.0,
                                 fba_floor=0.0,
                                 pathway_id='rp_pathway',
-                                objective_id='obj_RP1_sink__restricted_biomass',
+                                objective_id='obj_fraction',
                                 thermo_id='dfG_prime_m'):
     rpsbml_json = rpsbml.genJSON(pathway_id)
     globalscore = calculateGlobalScore_json(rpsbml_json,

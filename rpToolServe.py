@@ -16,6 +16,16 @@ sys.path.insert(0, '/home/')
 import rpSBML
 import rpTool
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+    datefmt='%d-%m-%Y %H:%M:%S',
+)
+
+'''
+logging.disable(logging.INFO)
+logging.disable(logging.WARNING)
+'''
 
 ## run using HDD 3X less than the above function
 #
@@ -33,7 +43,7 @@ def runGlobalScore_hdd(inputTar,
                        fba_ceil=5.0,
                        fba_floor=0.0,
                        pathway_id='rp_pathway',
-                       objective_id='obj_RP1_sink__restricted_biomass',
+                       objective_id='obj_fraction',
                        thermo_id='dfG_prime_m'):
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
