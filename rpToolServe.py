@@ -74,7 +74,7 @@ def runGlobalScore_hdd(inputTar,
                 file_names_score[file_name] = globalScore
                 rpsbml.writeSBML(tmpOutputFolder)
             #sort the results
-            top_file_names = [k for k, v in sorted(file_names_score.items(), key=lambda item: item[1])][:topX]
+            top_file_names = [k for k, v in sorted(file_names_score.items(), key=lambda item: item[1], reverse=True)][:topX]
             if len(glob.glob(tmpOutputFolder+'/*'))==0:
                 logging.error('rpGlobalScore has not generated any results')
                 return {}
