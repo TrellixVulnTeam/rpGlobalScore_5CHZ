@@ -33,7 +33,6 @@ def calculateGlobalScore_json(rpsbml_json,
                               weight_rule_score=0.0,
                               weight_fba=0.699707,
                               weight_thermo=0.8334961,
-                              weight_var_thermo=0.8334961,
                               max_rp_steps=15, #TODO: add this as a limit in RP2
                               thermo_ceil=8901.2,
                               thermo_floor=-7570.2,
@@ -125,9 +124,9 @@ def calculateGlobalScore_json(rpsbml_json,
             rpsbml_json['pathway']['brsynth']['norm_'+bd_id] = {}
             rpsbml_json['pathway']['brsynth']['var_'+bd_id] = {}
             #here add weights based on std
-            rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = np.average(path_norm[bd_id])
+            rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = np.average([np.average(path_norm[bd_id]), 1.0-np.std(path_norm[bd_id])], weights=[0.5, 0.5])
             #the score is higher is better - (-1 since we want lower variability)
-            rpsbml_json['pathway']['brsynth']['var_'+bd_id]['value'] = 1.0-np.var(path_norm[bd_id])
+            #rpsbml_json['pathway']['brsynth']['var_'+bd_id]['value'] = 1.0-np.var(path_norm[bd_id])
     ############# rule score ############
     #higher is better
     if not 'rule_score' in path_norm:
@@ -163,10 +162,9 @@ def calculateGlobalScore_json(rpsbml_json,
     try:
         globalScore = np.average([rpsbml_json['pathway']['brsynth']['norm_rule_score']['value'],
                                   rpsbml_json['pathway']['brsynth']['norm_'+str(thermo_id)]['value'],
-                                  rpsbml_json['pathway']['brsynth']['var_'+str(thermo_id)]['value'],
                                   rpsbml_json['pathway']['brsynth']['norm_steps']['value'],
                                   rpsbml_json['pathway']['brsynth']['norm_fba_'+str(objective_id)]['value']],
-                                  weights=[weight_rule_score, weight_thermo, weight_var_thermo, weight_rp_steps, weight_fba]
+                                  weights=[weight_rule_score, weight_thermo, weight_rp_steps, weight_fba]
                                  )
         '''
         globalScore = (rpsbml_json['pathway']['brsynth']['norm_rule_score']['value']*weight_rule_score+
