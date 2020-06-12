@@ -20,19 +20,19 @@ import docker
 def main(inputfile,
          input_format,
          output,
-         weight_rule_score,
-         weight_fba,
-         weight_thermo,
-         weight_rp_steps,
-         max_rp_steps,
-         topX,
-         thermo_ceil,
-         thermo_floor,
-         fba_ceil,
-         fba_floor,
-         pathway_id,
-         objective_id,
-         thermo_id):
+         weight_rp_steps=0.002930832356389215,
+         weight_rule_score=0.14947245017584998,
+         weight_fba=0.5890973036342322,
+         weight_thermo=0.25849941383352876,
+         max_rp_steps=15,
+         topX=10,
+         thermo_ceil=8901.2,
+         thermo_floor=-7570.2,
+         fba_ceil=5.0,
+         fba_floor=0.0,
+         pathway_id='rp_pathway',
+         objective_id='obj_fraction',
+         thermo_id='dfG_prime_m'):
     docker_client = docker.from_env()
     image_str = 'brsynth/rpglobalscore-standalone:dev'
     try:
@@ -97,18 +97,18 @@ if __name__ == "__main__":
     parser.add_argument('-input', type=str)
     parser.add_argument('-input_format', type=str)
     parser.add_argument('-output', type=str)
-    parser.add_argument('-weight_rule_score', type=float, default=0.0)
-    parser.add_argument('-weight_fba', type=float, default=0.699707)
-    parser.add_argument('-weight_thermo', type=float, default=0.8334961)
-    parser.add_argument('-weight_rp_steps', type=float, default=0.0)
+    parser.add_argument('-weight_rule_score', type=float, default=0.14947245017584998)
+    parser.add_argument('-weight_fba', type=float, default=0.5890973036342322)
+    parser.add_argument('-weight_thermo', type=float, default=0.25849941383352876)
+    parser.add_argument('-weight_rp_steps', type=float, default=0.002930832356389215)
     parser.add_argument('-max_rp_steps', type=int, default=15) #WARNING: should not have a default
     parser.add_argument('-topX', type=int, default=10)
     parser.add_argument('-thermo_ceil', type=float, default=8901.2)
     parser.add_argument('-thermo_floor', type=float, default=-7570.2)
-    parser.add_argument('-fba_ceil', type=float, default=3.0)
+    parser.add_argument('-fba_ceil', type=float, default=5.0)
     parser.add_argument('-fba_floor', type=float, default=0.0)
     parser.add_argument('-pathway_id', type=str, default='rp_pathway')
-    parser.add_argument('-objective_id', type=str, default='obj_RP1_sink__restricted_biomass')
+    parser.add_argument('-objective_id', type=str, default='obj_fraction')
     parser.add_argument('-thermo_id', type=str, default='dfG_prime_m')
     params = parser.parse_args()
     main(params.input,

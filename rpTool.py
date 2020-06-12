@@ -29,10 +29,10 @@ def nonlin(x,deriv=False):
 # Higher is better
 #TODO: try to standardize the values instead of normalisation.... Advantage: not bounded
 def calculateGlobalScore_json(rpsbml_json,
-                              weight_rp_steps=0.0,
-                              weight_rule_score=0.0,
-                              weight_fba=0.699707,
-                              weight_thermo=0.8334961,
+                              weight_rp_steps=0.002930832356389215,
+                              weight_rule_score=0.14947245017584998,
+                              weight_fba=0.5890973036342322,
+                              weight_thermo=0.25849941383352876,
                               max_rp_steps=15, #TODO: add this as a limit in RP2
                               thermo_ceil=8901.2,
                               thermo_floor=-7570.2,

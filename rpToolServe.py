@@ -22,20 +22,18 @@ logging.basicConfig(
     datefmt='%d-%m-%Y %H:%M:%S',
 )
 
-'''
 logging.disable(logging.INFO)
 logging.disable(logging.WARNING)
-'''
 
 ## run using HDD 3X less than the above function
 #
 #
 def runGlobalScore_hdd(inputTar,
                        outputTar,
-                       weight_rp_steps=0.0,
-                       weight_rule_score=0.5,
-                       weight_fba=0.699707,
-                       weight_thermo=0.8334961,
+                       weight_rp_steps=0.002930832356389215,
+                       weight_rule_score=0.14947245017584998,
+                       weight_fba=0.5890973036342322,
+                       weight_thermo=0.25849941383352876,
                        max_rp_steps=15,
                        topX=10,
                        thermo_ceil=8901.2,
