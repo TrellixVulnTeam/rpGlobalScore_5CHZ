@@ -36,13 +36,19 @@ def runGlobalScore_hdd(inputTar,
                        weight_thermo=0.25849941383352876,
                        max_rp_steps=15,
                        topX=10,
-                       thermo_ceil=8901.2,
-                       thermo_floor=-7570.2,
+                       thermo_ceil=5000.0,
+                       thermo_floor=-5000.0,
                        fba_ceil=5.0,
                        fba_floor=0.0,
                        pathway_id='rp_pathway',
                        objective_id='obj_fraction',
                        thermo_id='dfG_prime_m'):
+    logging.info('max_rp_steps: '+str(max_rp_steps))
+    logging.info('topX: '+str(topX))
+    logging.info('thermo_ceil: '+str(thermo_ceil))
+    logging.info('thermo_floor: '+str(thermo_floor))
+    logging.info('fba_ceil: '+str(fba_ceil))
+    logging.info('fba_floor: '+str(fba_floor))
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
             tar = tarfile.open(inputTar, mode='r')

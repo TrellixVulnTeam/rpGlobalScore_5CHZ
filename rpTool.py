@@ -34,8 +34,8 @@ def calculateGlobalScore_json(rpsbml_json,
                               weight_fba=0.5890973036342322,
                               weight_thermo=0.25849941383352876,
                               max_rp_steps=15, #TODO: add this as a limit in RP2
-                              thermo_ceil=8901.2,
-                              thermo_floor=-7570.2,
+                              thermo_ceil=5000.0,
+                              thermo_floor=-5000.0,
                               fba_ceil=5.0,
                               fba_floor=0.0,
                               pathway_id='rp_pathway',
@@ -46,6 +46,10 @@ def calculateGlobalScore_json(rpsbml_json,
     ########################################### REACTIONS #################################################
     ####################################################################################################### 
     #WARNING: we do this because the list gets updated
+    logging.info('thermo_ceil: '+str(thermo_ceil))
+    logging.info('thermo_floor: '+str(thermo_floor))
+    logging.info('fba_ceil: '+str(fba_ceil))
+    logging.info('fba_floor: '+str(fba_floor))
     list_reac_id = list(rpsbml_json['reactions'].keys())
     for reac_id in list_reac_id:
         list_bd_id = list(rpsbml_json['reactions'][reac_id]['brsynth'].keys())
@@ -70,6 +74,7 @@ def calculateGlobalScore_json(rpsbml_json,
                     norm_thermo = 1.0
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id] = {}
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id]['value'] = norm_thermo
+                logging.info(str(bd_id)+': '+str(rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'])+' ('+str(norm_thermo)+')')
                 path_norm[bd_id].append(norm_thermo)
             ####### FBA ##############
             #higher is better
@@ -110,12 +115,12 @@ def calculateGlobalScore_json(rpsbml_json,
             if fba_ceil>=rpsbml_json['pathway']['brsynth'][bd_id]['value']>=fba_floor:
                 #min-max feature scaling
                 norm_fba = (rpsbml_json['pathway']['brsynth'][bd_id]['value']-fba_floor)/(fba_ceil-fba_floor)
-            elif rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']<=fba_floor:
+            elif rpsbml_json['pathway']['brsynth'][bd_id]['value']<=fba_floor:
                 norm_fba = 0.0
-            elif rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value']>fba_ceil:
+            elif rpsbml_json['pathway']['brsynth'][bd_id]['value']>fba_ceil:
                 norm_fba = 1.0
             else:
-                logging.warning('This flux event should never happen')
+                logging.warning('This flux event should never happen: '+str(rpsbml_json['pathway']['brsynth'][bd_id]['value']))
             rpsbml_json['pathway']['brsynth']['norm_'+bd_id] = {}
             rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = norm_fba
     ############# thermo ################
@@ -124,6 +129,7 @@ def calculateGlobalScore_json(rpsbml_json,
             rpsbml_json['pathway']['brsynth']['norm_'+bd_id] = {}
             rpsbml_json['pathway']['brsynth']['var_'+bd_id] = {}
             #here add weights based on std
+            logging.info(str(bd_id)+': '+str(path_norm[bd_id]))
             rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = np.average([np.average(path_norm[bd_id]), 1.0-np.std(path_norm[bd_id])], weights=[0.5, 0.5])
             #the score is higher is better - (-1 since we want lower variability)
             #rpsbml_json['pathway']['brsynth']['var_'+bd_id]['value'] = 1.0-np.var(path_norm[bd_id])
@@ -193,8 +199,8 @@ def calculateGlobalScore_rpsbml(rpsbml,
                                 weight_fba,
                                 weight_thermo,
                                 max_rp_steps=15, #TODO: add this as a limit in RP2
-                                thermo_ceil=8901.2,
-                                thermo_floor=-7570.2,
+                                thermo_ceil=5000.0,
+                                thermo_floor=-5000.0,
                                 fba_ceil=5.0,
                                 fba_floor=0.0,
                                 pathway_id='rp_pathway',
@@ -219,6 +225,7 @@ def calculateGlobalScore_rpsbml(rpsbml,
 
 
 def updateBRSynthPathway(rpsbml, rpsbml_json, pathway_id='rp_pathway'):
+    logging.info('rpsbml_json: '+str(rpsbml_json))
     groups = rpsbml.model.getPlugin('groups')
     rp_pathway = groups.getGroup(pathway_id)
     for bd_id in rpsbml_json['pathway']['brsynth']:
