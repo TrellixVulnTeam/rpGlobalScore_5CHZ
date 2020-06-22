@@ -19,8 +19,6 @@ def nonlin(x,deriv=False):
         return x*(1-x)
     return 1/(1+np.exp(-x))
 
-
-
 ## Extract the reaction SMILES from an SBML, query rule_score and write the results back to the SBML
 #
 # Higher is better
