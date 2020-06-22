@@ -28,12 +28,13 @@ logging.disable(logging.WARNING)
 ## run using HDD 3X less than the above function
 #
 #
+#[0.10002239003499142, 0.13346271414277305, 0.6348436269211155, 0.13167126890112002]
 def runGlobalScore_hdd(inputTar,
                        outputTar,
-                       weight_rp_steps=0.002930832356389215,
-                       weight_rule_score=0.14947245017584998,
-                       weight_fba=0.5890973036342322,
-                       weight_thermo=0.25849941383352876,
+                       weight_rp_steps=0.10002239003499142,
+                       weight_rule_score=0.13346271414277305,
+                       weight_fba=0.6348436269211155,
+                       weight_thermo=0.13167126890112002,
                        max_rp_steps=15,
                        topX=10,
                        thermo_ceil=5000.0,
