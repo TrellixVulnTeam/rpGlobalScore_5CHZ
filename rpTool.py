@@ -10,6 +10,13 @@ import json
 sys.path.insert(0, '/home/')
 import rpSBML
 
+logging.basicConfig(
+    #level=logging.DEBUG,
+    #level=logging.WARNING,
+    level=logging.ERROR,
+    format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+    datefmt='%d-%m-%Y %H:%M:%S',
+)
 
 ## Normalise by sigmoidal function
 # NOT USED
@@ -44,10 +51,10 @@ def calculateGlobalScore_json(rpsbml_json,
     ########################################### REACTIONS #################################################
     ####################################################################################################### 
     #WARNING: we do this because the list gets updated
-    logging.info('thermo_ceil: '+str(thermo_ceil))
-    logging.info('thermo_floor: '+str(thermo_floor))
-    logging.info('fba_ceil: '+str(fba_ceil))
-    logging.info('fba_floor: '+str(fba_floor))
+    logging.debug('thermo_ceil: '+str(thermo_ceil))
+    logging.debug('thermo_floor: '+str(thermo_floor))
+    logging.debug('fba_ceil: '+str(fba_ceil))
+    logging.debug('fba_floor: '+str(fba_floor))
     list_reac_id = list(rpsbml_json['reactions'].keys())
     for reac_id in list_reac_id:
         list_bd_id = list(rpsbml_json['reactions'][reac_id]['brsynth'].keys())
@@ -72,7 +79,7 @@ def calculateGlobalScore_json(rpsbml_json,
                     norm_thermo = 1.0
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id] = {}
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id]['value'] = norm_thermo
-                logging.info(str(bd_id)+': '+str(rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'])+' ('+str(norm_thermo)+')')
+                logging.debug(str(bd_id)+': '+str(rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'])+' ('+str(norm_thermo)+')')
                 path_norm[bd_id].append(norm_thermo)
             ####### FBA ##############
             #higher is better
@@ -100,7 +107,7 @@ def calculateGlobalScore_json(rpsbml_json,
                 #rule score higher is better
                 path_norm[bd_id].append(rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'])
             else:
-                logging.info('Not normalising: '+str(bd_id))
+                logging.debug('Not normalising: '+str(bd_id))
     ####################################################################################################### 
     ########################################### PATHWAY ###################################################
     ####################################################################################################### 
@@ -127,7 +134,7 @@ def calculateGlobalScore_json(rpsbml_json,
             rpsbml_json['pathway']['brsynth']['norm_'+bd_id] = {}
             rpsbml_json['pathway']['brsynth']['var_'+bd_id] = {}
             #here add weights based on std
-            logging.info(str(bd_id)+': '+str(path_norm[bd_id]))
+            logging.debug(str(bd_id)+': '+str(path_norm[bd_id]))
             rpsbml_json['pathway']['brsynth']['norm_'+bd_id]['value'] = np.average([np.average(path_norm[bd_id]), 1.0-np.std(path_norm[bd_id])], weights=[0.5, 0.5])
             #the score is higher is better - (-1 since we want lower variability)
             #rpsbml_json['pathway']['brsynth']['var_'+bd_id]['value'] = 1.0-np.var(path_norm[bd_id])
@@ -155,15 +162,15 @@ def calculateGlobalScore_json(rpsbml_json,
     #################################################
     ################# GLOBAL ########################
     #################################################
-    rpsbml_json['pathway']['brsynth']['norm_steps'] = {}
-    rpsbml_json['pathway']['brsynth']['norm_steps']['value'] = norm_steps
-    logging.info('Using the following values for the global score:')
-    logging.info('Rule Score: '+str(rpsbml_json['pathway']['brsynth']['norm_rule_score']['value']))
-    logging.info('Thermo: '+str(rpsbml_json['pathway']['brsynth']['norm_'+str(thermo_id)]['value']))
-    logging.info('Steps: '+str(rpsbml_json['pathway']['brsynth']['norm_steps']['value']))
-    logging.info('FBA ('+str('norm_fba_'+str(objective_id))+'): '+str(rpsbml_json['pathway']['brsynth']['norm_fba_'+str(objective_id)]['value']))
     ##### global score #########
     try:
+        rpsbml_json['pathway']['brsynth']['norm_steps'] = {}
+        rpsbml_json['pathway']['brsynth']['norm_steps']['value'] = norm_steps
+        logging.debug('Using the following values for the global score:')
+        logging.debug('Rule Score: '+str(rpsbml_json['pathway']['brsynth']['norm_rule_score']['value']))
+        logging.debug('Thermo: '+str(rpsbml_json['pathway']['brsynth']['norm_'+str(thermo_id)]['value']))
+        logging.debug('Steps: '+str(rpsbml_json['pathway']['brsynth']['norm_steps']['value']))
+        logging.debug('FBA ('+str('norm_fba_'+str(objective_id))+'): '+str(rpsbml_json['pathway']['brsynth']['norm_fba_'+str(objective_id)]['value']))
         globalScore = np.average([rpsbml_json['pathway']['brsynth']['norm_rule_score']['value'],
                                   rpsbml_json['pathway']['brsynth']['norm_'+str(thermo_id)]['value'],
                                   rpsbml_json['pathway']['brsynth']['norm_steps']['value'],
@@ -223,7 +230,7 @@ def calculateGlobalScore_rpsbml(rpsbml,
 
 
 def updateBRSynthPathway(rpsbml, rpsbml_json, pathway_id='rp_pathway'):
-    logging.info('rpsbml_json: '+str(rpsbml_json))
+    logging.debug('rpsbml_json: '+str(rpsbml_json))
     groups = rpsbml.model.getPlugin('groups')
     rp_pathway = groups.getGroup(pathway_id)
     for bd_id in rpsbml_json['pathway']['brsynth']:

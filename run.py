@@ -85,7 +85,6 @@ def main(inputfile,
                 command, 
                 auto_remove=True, 
                 detach=False, 
-                remove=True,
                 volumes={tmpOutputFolder+'/': {'bind': '/home/tmp_output', 'mode': 'rw'}})
         shutil.copy(tmpOutputFolder+'/output.dat', output)
 
