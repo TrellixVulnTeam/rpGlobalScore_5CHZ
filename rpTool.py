@@ -79,7 +79,7 @@ def calculateGlobalScore_json(rpsbml_json,
                     norm_thermo = 1.0
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id] = {}
                 rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id]['value'] = norm_thermo
-                logging.debug(str(bd_id)+': '+str(rpsbml_json['reactions'][reac_id]['brsynth'][bd_id]['value'])+' ('+str(norm_thermo)+')')
+                logging.debug(str(bd_id)+': '+str(rpsbml_json['reactions'][reac_id]['brsynth']['norm_'+bd_id]['value'])+' ('+str(norm_thermo)+')')
                 path_norm[bd_id].append(norm_thermo)
             ####### FBA ##############
             #higher is better
