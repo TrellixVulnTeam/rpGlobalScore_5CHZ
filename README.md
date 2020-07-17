@@ -39,7 +39,7 @@ Advanced options:
 To build the image using the Dockerfile, use the following command:
 
 ```
-docker build -t brsynth/rpglobalscore-standalone -f Dockerfile .
+docker build -t brsynth/rpglobalscore-standalone:v1 -f Dockerfile .
 ```
 
 ### Running the tests
