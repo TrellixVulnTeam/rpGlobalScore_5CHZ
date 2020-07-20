@@ -33,10 +33,10 @@
       <param name="pathway_id" type="text" value="rp_pathway" label="SBML heterologous pathway ID" />
       <param name="objective_id" type="text" value="obj_fraction" label="Heterologous pathway objective ID" />
       <param name="thermo_id" type="text" value="dfG_prime_m" label="Thermodynamics ID" />
-      <param name="weight_rule_score" value="0.1246" type="float" label="Reaction rule weight" />
-      <param name="weight_fba" value="0.324" type="float" label="FBA weight" />
-      <param name="weight_thermo" value="0.544" type="float" label="Thermodynamics weight" />
-      <param name="weight_rp_steps" value="0.073" type="float" label="Steps weight" />
+      <param name="weight_rule_score" value="0.13346271414277305" type="float" label="Reaction rule weight" />
+      <param name="weight_fba" value="0.6348436269211155" type="float" label="FBA weight" />
+      <param name="weight_thermo" value="0.13167126890112002" type="float" label="Thermodynamics weight" />
+      <param name="weight_rp_steps" value="0.10002239003499142" type="float" label="Steps weight" />
 </section>
   </inputs>
   <outputs>
