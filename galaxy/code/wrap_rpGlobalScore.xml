@@ -1,7 +1,7 @@
 <tool id="rpGlobalScore" name="Rank Pathways" version="0.1">
   <description>Calculate the global score based on thermodynamics, FBA, length, and reaction rule scores of heterologous pathway</description>
   <requirements>
-    <container type="docker">brsynth/rpglobalscore-standalone</container>
+    <container type="docker">brsynth/rpglobalscore-standalone:v2</container>
   </requirements>
   <stdio>
 		<regex match="WARNING" level="warning" />

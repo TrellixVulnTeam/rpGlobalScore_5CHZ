@@ -34,7 +34,7 @@ def main(inputfile,
          objective_id='obj_fraction',
          thermo_id='dfG_prime_m'):
     docker_client = docker.from_env()
-    image_str = 'brsynth/rpglobalscore-standalone'
+    image_str = 'brsynth/rpglobalscore-standalone:v2'
     try:
         image = docker_client.images.get(image_str)
     except docker.errors.ImageNotFound:
