@@ -187,8 +187,12 @@ def calculateGlobalScore_json(rpsbml_json,
     except ZeroDivisionError:
         globalScore = 0.0
     except KeyError as e:
-        logging.error(rpsbml_json['pathway']['brsynth'].keys())
+        #logging.error(rpsbml_json['pathway']['brsynth'].keys())
         logging.error('KeyError for :'+str(e))
+        if 'dfG' in e:
+            logging.error('Have you ran the thermodynamics?')
+        elif 'fba' in e:
+            logging.error('Have you run the FBA on the heterologous pathways?')
         globalScore = 0.0
     rpsbml_json['pathway']['brsynth']['global_score'] = {}
     rpsbml_json['pathway']['brsynth']['global_score']['value'] = globalScore
