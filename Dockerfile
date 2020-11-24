@@ -1,4 +1,4 @@
-FROM brsynth/rpbase:v2
+FROM brsynth/rpbase
 
 RUN pip install scipy
 
