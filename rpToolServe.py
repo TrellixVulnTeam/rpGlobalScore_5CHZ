@@ -44,12 +44,34 @@ def runGlobalScore_hdd(inputTar,
                        pathway_id='rp_pathway',
                        objective_id='obj_fraction',
                        thermo_id='dfG_prime_m'):
-    logging.info('max_rp_steps: '+str(max_rp_steps))
-    logging.info('topX: '+str(topX))
-    logging.info('thermo_ceil: '+str(thermo_ceil))
-    logging.info('thermo_floor: '+str(thermo_floor))
-    logging.info('fba_ceil: '+str(fba_ceil))
-    logging.info('fba_floor: '+str(fba_floor))
+     """From a collection of rpSBML files, retreive the different characteristics of a pathway and combine them to calculate a global score.
+
+    Note that the results are added to the passed dict directly.
+
+    :param inputTar: An input tar collection of rpSBML files
+    :param outputTar: An output tar collection of rpSBML files
+    :param weight_rp_steps: The weight associated with the number of steps (Default: 0.10002239003499142)
+    :param weight_rule_score: The weight associated with the mean of reaction rule scores (Default: 0.13346271414277305)
+    :param weight_fba: The weight associated with the flux of the target (Default: 0.6348436269211155)
+    :param weight_thermo: The weight associated with the sum of reaction Gibbs free energy (Default: 0.13167126890112002)
+    :param max_rp_steps: The maximal number of steps are run in RP2 (Default: 15)
+    :param thermo_ceil: The upper limit of Gibbs free energy for each reaction (Default: 5000.0)
+    :param thermo_floor: The lower limit of Gibbs free energy for each reaction (Default: -5000.0)
+    :param fba_ceil: The upper flux limit of the heterologous pathway (Default: 5.0)
+    :param fba_floor: The lower flux limit of the heterologous pathway (Default: 5.0)
+    :param pathway_id: The ID of the heterologous pathway (Default: rp_pathway)
+    :param objective_id: The ID of the FBA objective (Default: obj_fraction)
+    :param thermo_id: The ID of the Gibbs free energy that may be used. May be either dfG_prime_m or dfG_prime_o (Default: dfG_prime_m)
+
+    :rtype: float
+    :return: The global score
+    """
+    logging.debug('max_rp_steps: '+str(max_rp_steps))
+    logging.debug('topX: '+str(topX))
+    logging.debug('thermo_ceil: '+str(thermo_ceil))
+    logging.debug('thermo_floor: '+str(thermo_floor))
+    logging.debug('fba_ceil: '+str(fba_ceil))
+    logging.debug('fba_floor: '+str(fba_floor))
     with tempfile.TemporaryDirectory() as tmpOutputFolder:
         with tempfile.TemporaryDirectory() as tmpInputFolder:
             tar = tarfile.open(inputTar, mode='r')

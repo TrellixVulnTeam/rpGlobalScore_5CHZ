@@ -46,6 +46,27 @@ def calculateGlobalScore_json(rpsbml_json,
                               pathway_id='rp_pathway',
                               objective_id='obj_fraction',
                               thermo_id='dfG_prime_m'):
+    """From a rpsbml dictionary, retreive the different characteristics of a pathway and combine them to calculate a global score.
+
+    Note that the results are added to the passed dict directly.
+
+    :param rpsbml_json: Dictionary of the rp_pathway
+    :param weight_rp_steps: The weight associated with the number of steps (Default: 0.10002239003499142)
+    :param weight_rule_score: The weight associated with the mean of reaction rule scores (Default: 0.13346271414277305)
+    :param weight_fba: The weight associated with the flux of the target (Default: 0.6348436269211155)
+    :param weight_thermo: The weight associated with the sum of reaction Gibbs free energy (Default: 0.13167126890112002)
+    :param max_rp_steps: The maximal number of steps are run in RP2 (Default: 15)
+    :param thermo_ceil: The upper limit of Gibbs free energy for each reaction (Default: 5000.0)
+    :param thermo_floor: The lower limit of Gibbs free energy for each reaction (Default: -5000.0)
+    :param fba_ceil: The upper flux limit of the heterologous pathway (Default: 5.0)
+    :param fba_floor: The lower flux limit of the heterologous pathway (Default: 5.0)
+    :param pathway_id: The ID of the heterologous pathway (Default: rp_pathway)
+    :param objective_id: The ID of the FBA objective (Default: obj_fraction)
+    :param thermo_id: The ID of the Gibbs free energy that may be used. May be either dfG_prime_m or dfG_prime_o (Default: dfG_prime_m)
+
+    :rtype: float
+    :return: The global score
+    """
     path_norm = {}
     ####################################################################################################### 
     ########################################### REACTIONS #################################################
@@ -166,11 +187,6 @@ def calculateGlobalScore_json(rpsbml_json,
     try:
         rpsbml_json['pathway']['brsynth']['norm_steps'] = {}
         rpsbml_json['pathway']['brsynth']['norm_steps']['value'] = norm_steps
-        logging.debug('Using the following values for the global score:')
-        logging.debug('Rule Score: '+str(rpsbml_json['pathway']['brsynth']['norm_rule_score']['value']))
-        logging.debug('Thermo: '+str(rpsbml_json['pathway']['brsynth']['norm_'+str(thermo_id)]['value']))
-        logging.debug('Steps: '+str(rpsbml_json['pathway']['brsynth']['norm_steps']['value']))
-        logging.debug('FBA ('+str('norm_fba_'+str(objective_id))+'): '+str(rpsbml_json['pathway']['brsynth']['norm_fba_'+str(objective_id)]['value']))
         globalScore = np.average([rpsbml_json['pathway']['brsynth']['norm_rule_score']['value'],
                                   rpsbml_json['pathway']['brsynth']['norm_'+str(thermo_id)]['value'],
                                   rpsbml_json['pathway']['brsynth']['norm_steps']['value'],
@@ -189,10 +205,7 @@ def calculateGlobalScore_json(rpsbml_json,
     except KeyError as e:
         #logging.error(rpsbml_json['pathway']['brsynth'].keys())
         logging.error('KeyError for :'+str(e))
-        if 'dfG' in e:
-            logging.error('Have you ran the thermodynamics?')
-        elif 'fba' in e:
-            logging.error('Have you run the FBA on the heterologous pathways?')
+        logging.error('Make sure that you run both thermodynamics and FBA')
         globalScore = 0.0
     rpsbml_json['pathway']['brsynth']['global_score'] = {}
     rpsbml_json['pathway']['brsynth']['global_score']['value'] = globalScore
@@ -215,6 +228,27 @@ def calculateGlobalScore_rpsbml(rpsbml,
                                 pathway_id='rp_pathway',
                                 objective_id='obj_fraction',
                                 thermo_id='dfG_prime_m'):
+    """From a rpsbml object, retreive the different characteristics of a pathway and combine them to calculate a global score.
+
+    Note that the results are written to the rpsbml directly
+
+    :param rpsbml: rpSBML object
+    :param weight_rp_steps: The weight associated with the number of steps (Default: 0.10002239003499142)
+    :param weight_rule_score: The weight associated with the mean of reaction rule scores (Default: 0.13346271414277305)
+    :param weight_fba: The weight associated with the flux of the target (Default: 0.6348436269211155)
+    :param weight_thermo: The weight associated with the sum of reaction Gibbs free energy (Default: 0.13167126890112002)
+    :param max_rp_steps: The maximal number of steps are run in RP2 (Default: 15)
+    :param thermo_ceil: The upper limit of Gibbs free energy for each reaction (Default: 5000.0)
+    :param thermo_floor: The lower limit of Gibbs free energy for each reaction (Default: -5000.0)
+    :param fba_ceil: The upper flux limit of the heterologous pathway (Default: 5.0)
+    :param fba_floor: The lower flux limit of the heterologous pathway (Default: 5.0)
+    :param pathway_id: The ID of the heterologous pathway (Default: rp_pathway)
+    :param objective_id: The ID of the FBA objective (Default: obj_fraction)
+    :param thermo_id: The ID of the Gibbs free energy that may be used. May be either dfG_prime_m or dfG_prime_o (Default: dfG_prime_m)
+
+    :rtype: float
+    :return: The global score
+    """
     rpsbml_json = rpsbml.genJSON(pathway_id)
     globalscore = calculateGlobalScore_json(rpsbml_json,
                                             weight_rp_steps,
@@ -234,6 +268,14 @@ def calculateGlobalScore_rpsbml(rpsbml,
 
 
 def updateBRSynthPathway(rpsbml, rpsbml_json, pathway_id='rp_pathway'):
+    """Update the heterologous pathway from a dictionary to a rpsbml file
+
+    :param rpsbml: rpSBML object
+    :param rpsbml_json: The dictionary of the heterologous pathway
+    :param pathway_id: The ID of the heterologous pathway
+    
+    :return: None
+    """
     logging.debug('rpsbml_json: '+str(rpsbml_json))
     groups = rpsbml.model.getPlugin('groups')
     rp_pathway = groups.getGroup(pathway_id)
