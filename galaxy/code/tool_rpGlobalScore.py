@@ -74,7 +74,26 @@ if __name__ == "__main__":
                                                        params.objective_id,
                                                        params.thermo_id)
             with tarfile.open(output_tar) as outtar:
-                outtar.extractall(tmpoutputfolder)
+                def is_within_directory(directory, target):
+                    
+                    abs_directory = os.path.abspath(directory)
+                    abs_target = os.path.abspath(target)
+                
+                    prefix = os.path.commonprefix([abs_directory, abs_target])
+                    
+                    return prefix == abs_directory
+                
+                def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                
+                    for member in tar.getmembers():
+                        member_path = os.path.join(path, member.name)
+                        if not is_within_directory(path, member_path):
+                            raise Exception("Attempted Path Traversal in Tar File")
+                
+                    tar.extractall(path, members, numeric_owner) 
+                    
+                
+                safe_extract(outtar, tmpoutputfolder)
             out_file = glob.glob(tmpoutputfolder+'/*.rpsbml.xml')
             if len(out_file)>1:
                 logging.warning('there are more than one output file...')
